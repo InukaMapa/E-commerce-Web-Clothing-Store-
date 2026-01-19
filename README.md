@@ -76,7 +76,7 @@
 
 # smart-ecommerce-system/ - frontend/ (React UI) - backend/ (Express
 
-# APIs) - ml-service/ (LSTM ML microservice) - docs/ (SRS \& diagrams)
+# APIs) - ml-service/ (LSTM ML microservice) 
 
 # 
 
@@ -152,21 +152,7 @@
 
 # Sales data is collected from Phase 1 (WordPress + WooCommerce) and used
 
-# to train the LSTM demand forecasting model.
-
-# 
-
-# ------------------------------------------------------------------------
-
-# 
-
-# \## 📄 Documentation
-
-# 
-
-# Detailed documents are available in the docs/ folder: - Software
-
-# Requirements Specification (SRS) - Architecture \& ER diagrams
+# to train the LSTM demand forecasting model
 
 # 
 
