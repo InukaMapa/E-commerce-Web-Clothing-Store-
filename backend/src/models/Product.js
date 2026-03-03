@@ -4,7 +4,8 @@ const variantSchema = new mongoose.Schema({
   size: String,
   color: String,
   sku: String,
-  stock: Number,
+  stock: { type: Number, default: 0 },
+  lowStockThreshold: { type: Number, default: 5 },
 });
 
 const productSchema = new mongoose.Schema({
