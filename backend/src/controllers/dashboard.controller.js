@@ -21,21 +21,15 @@ const getQueryDates = (from, to) => {
 exports.getAlerts = async (req, res) => {
   try {
     // ── 1. Identify low stock variants ────────────────────────────────────
-    // We look for products containing at least one variant where stock is 
-    // less than or equal to its specific threshold.
-    const lowStockProducts = await Product.find({
-      "variants": {
-        $elemMatch: {
-          $expr: { $lte: ["$stock", "$lowStockThreshold"] }
-        }
-      }
-    }).select("name variants price").lean();
+    // Fetch all products to filter variants by comparing fields in JS
+    const allProducts = await Product.find().select("name variants price").lean();
 
-    // Flatten into a more useful format for the UI
     const alerts = [];
-    for (const p of lowStockProducts) {
+    for (const p of allProducts) {
+      if (!p.variants) continue;
       for (const v of p.variants) {
-        if (v.stock <= v.lowStockThreshold) {
+        // Compare stock with threshold per variant
+        if (v.stock <= (v.lowStockThreshold || 5)) {
           alerts.push({
             productId: p._id,
             productName: p.name,
@@ -43,7 +37,7 @@ exports.getAlerts = async (req, res) => {
             size: v.size,
             color: v.color,
             stock: v.stock,
-            threshold: v.lowStockThreshold,
+            threshold: v.lowStockThreshold || 5,
             severity: v.stock === 0 ? "CRITICAL" : "LOW"
           });
         }

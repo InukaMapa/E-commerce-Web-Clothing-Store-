@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const User = require("../models/User"); // Ensure User model is registered for population
 
 // ---------------------------------------------------------------------------
 // List products (public) — search, filter, sort, paginate
