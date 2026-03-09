@@ -50,7 +50,7 @@ export default function Checkout() {
       if (res.data?.success) {
         setOrderId(res.data.data.order._id);
         clear(); // Wipe cart context & localStorage
-        
+
         // Redirect home after a 2.5s delay
         setTimeout(() => {
           navigate("/");
@@ -93,7 +93,7 @@ export default function Checkout() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 text-center">
         <h2 className="text-xl font-bold text-gray-900">Your bag is empty</h2>
         <p className="mt-2 text-gray-500">Redirecting to shop...</p>
-        <Link to="/" className="mt-6 text-indigo-600 font-bold hover:underline">Return manually</Link>
+        <Link to="/" className="mt-6 text-black font-bold hover:underline">Return manually</Link>
       </div>
     );
   }
@@ -110,10 +110,10 @@ export default function Checkout() {
         {error && (
           <div className="mb-8 rounded-xl bg-red-50 border border-red-200 p-4 shadow-sm">
             <div className="flex items-center">
-               <svg className="h-5 w-5 text-red-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-               </svg>
-               <p className="text-sm font-semibold text-red-800">{error}</p>
+              <svg className="h-5 w-5 text-red-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <p className="text-sm font-semibold text-red-800">{error}</p>
             </div>
           </div>
         )}
@@ -148,7 +148,7 @@ export default function Checkout() {
               </div>
               <div className="flex justify-between items-center border-t border-gray-200 pt-6">
                 <p className="text-xl font-black text-gray-900 leading-none">Total Due</p>
-                <p className="text-2xl font-black text-indigo-600">
+                <p className="text-2xl font-black text-black">
                   ${(total > 100 ? total : total + 15).toFixed(2)}
                 </p>
               </div>
@@ -159,9 +159,8 @@ export default function Checkout() {
             <button
               onClick={handleSubmitOrder}
               disabled={loading}
-              className={`flex w-full items-center justify-center rounded-2xl bg-indigo-600 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-indigo-700 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                loading ? "opacity-70 cursor-not-allowed" : "shadow-lg shadow-indigo-100"
-              }`}
+              className={`flex w-full items-center justify-center rounded-2xl bg-black px-8 py-4 text-sm font-bold text-white transition-all hover:bg-black hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${loading ? "opacity-70 cursor-not-allowed" : "shadow-lg shadow-black"
+                }`}
             >
               {loading ? (
                 <div className="flex items-center">
@@ -178,11 +177,11 @@ export default function Checkout() {
             <p className="mt-4 text-center text-xs text-gray-400 font-medium">By completing your order, you agree to our Terms of Use.</p>
           </div>
         </div>
-        
+
         <div className="mt-8 flex justify-center items-center space-x-6 text-gray-400 grayscale opacity-50">
-           <svg className="h-6" viewBox="0 0 38 24" fill="currentColor"><path d="M12 24c-6.627 0-12-5.373-12-12s5.373-12 12-12 12 5.373 12 12-5.373 12-12 12zm14-12c0-3.132 1.055-6.012 2.825-8.318-2.204-1.077-4.665-1.682-7.225-1.682-1.556 0-3.052.221-4.471.632 2.665 1.776 4.471 4.793 4.471 8.368 0 3.575-1.806 6.592-4.471 8.368 1.419.411 2.915.632 4.471.632 2.56 0 5.021-.605 7.225-1.682-1.77 2.306-2.825 5.186-2.825 8.318z"/></svg>
-           <svg className="h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2l-6.5 6s4 6.5 4 6.5l2.5-2.5 4 4.5h6l-10-14.5zm-5 13.5l1.5 1.5-1.5 1.5-1.5-1.5 1.5-1.5z"/></svg>
-           <span className="text-[10px] uppercase font-black tracking-tighter">Secure Checkout</span>
+          <svg className="h-6" viewBox="0 0 38 24" fill="currentColor"><path d="M12 24c-6.627 0-12-5.373-12-12s5.373-12 12-12 12 5.373 12 12-5.373 12-12 12zm14-12c0-3.132 1.055-6.012 2.825-8.318-2.204-1.077-4.665-1.682-7.225-1.682-1.556 0-3.052.221-4.471.632 2.665 1.776 4.471 4.793 4.471 8.368 0 3.575-1.806 6.592-4.471 8.368 1.419.411 2.915.632 4.471.632 2.56 0 5.021-.605 7.225-1.682-1.77 2.306-2.825 5.186-2.825 8.318z" /></svg>
+          <svg className="h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2l-6.5 6s4 6.5 4 6.5l2.5-2.5 4 4.5h6l-10-14.5zm-5 13.5l1.5 1.5-1.5 1.5-1.5-1.5 1.5-1.5z" /></svg>
+          <span className="text-[10px] uppercase font-black tracking-tighter">Secure Checkout</span>
         </div>
       </div>
     </div>

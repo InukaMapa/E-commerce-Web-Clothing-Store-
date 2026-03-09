@@ -18,7 +18,7 @@ const Field = ({ id, label, type = "text", placeholder, hint, value, onChange, e
       placeholder={placeholder}
       className={`block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset
         ${error ? "ring-red-500 bg-red-50" : "ring-gray-300"} 
-        placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 sm:text-sm transition-all outline-none`}
+        placeholder:text-gray-400 focus:ring-2 focus:ring-black sm:text-sm transition-all outline-none`}
     />
     {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
     {hint && !error && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
@@ -95,7 +95,7 @@ export default function Register() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-black   border-t-transparent"></div>
       </div>
     );
   }
@@ -104,14 +104,11 @@ export default function Register() {
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-6 py-12 lg:px-8">
       {/* Brand Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center">
-        <div className="mx-auto h-12 w-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg">
-          SL
-        </div>
         <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-gray-900">
           Create your account
         </h2>
         <p className="mt-2 text-sm text-gray-600">
-          Join <span className="font-bold text-indigo-600">Slaughter</span> — style starts here.
+          Join <span className="font-bold text-black">Slaughter</span> — style starts here.
         </p>
       </div>
 
@@ -130,10 +127,10 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {/* Full Name */}
-            <Field 
-              id="name" 
-              label="Full name" 
-              placeholder="John Doe" 
+            <Field
+              id="name"
+              label="Full name"
+              placeholder="John Doe"
               value={formData.name}
               onChange={handleChange}
               error={errors.name}
@@ -141,11 +138,11 @@ export default function Register() {
             />
 
             {/* Email */}
-            <Field 
-              id="email" 
-              label="Email address" 
-              type="email" 
-              placeholder="john@example.com" 
+            <Field
+              id="email"
+              label="Email address"
+              type="email"
+              placeholder="john@example.com"
               value={formData.email}
               onChange={handleChange}
               error={errors.email}
@@ -182,8 +179,8 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex w-full justify-center items-center rounded-xl bg-indigo-600 py-3 px-4 text-sm font-bold text-white shadow-sm transition-all
-                  ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:bg-indigo-700 hover:scale-[1.01] active:scale-[0.99]"}`}
+                className={`flex w-full justify-center items-center rounded-xl bg-black py-3 px-4 text-sm font-bold text-white shadow-sm transition-all
+                  ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:bg-black hover:scale-[1.01] active:scale-[0.99]"}`}
               >
                 {isSubmitting ? (
                   <>
@@ -204,7 +201,7 @@ export default function Register() {
         {/* Sign-in Link */}
         <p className="mt-8 text-center text-sm text-gray-500">
           Already have an account?{" "}
-          <Link to="/login" className="font-bold text-indigo-600 hover:text-indigo-500">
+          <Link to="/login" className="font-bold text-black hover:text-black">
             Sign in
           </Link>
         </p>

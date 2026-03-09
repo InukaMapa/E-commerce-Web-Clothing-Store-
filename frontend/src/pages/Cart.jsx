@@ -32,7 +32,7 @@ export default function Cart() {
         <p className="mt-2 text-gray-500 max-w-xs text-center">Items you add to your bag will appear here. Ready to find something new?</p>
         <Link
           to="/"
-          className="mt-8 rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-indigo-700 hover:scale-105 active:scale-95 shadow-indigo-100"
+          className="mt-8 rounded-full bg-black  px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-black hover:scale-105 active:scale-95 shadow-indigo-100"
         >
           View Collection
         </Link>
@@ -66,8 +66,8 @@ export default function Cart() {
                       <div>
                         <div className="flex justify-between">
                           <h3 className="text-sm font-bold text-gray-900 hover:text-indigo-600 cursor-pointer transition-colors"
-                              onClick={() => navigate(`/products/${item.productId}`)}>
-                             {item.name}
+                            onClick={() => navigate(`/products/${item.productId}`)}>
+                            {item.name}
                           </h3>
                         </div>
                         <div className="mt-1 flex text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -78,17 +78,17 @@ export default function Cart() {
 
                       <div className="mt-4 flex items-center justify-between sm:mt-0 sm:block sm:text-right">
                         <p className="text-sm font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
-                        
+
                         {/* Quantity Controls */}
                         <div className="mt-1.5 flex items-center rounded-lg border border-gray-200 w-fit sm:ml-auto">
-                          <button 
+                          <button
                             onClick={() => updateQty(item.productId, item.variantSku, item.quantity - 1)}
                             className="p-1.5 hover:text-indigo-600 transition-colors"
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
                           </button>
                           <span className="w-8 text-center text-xs font-bold leading-none">{item.quantity}</span>
-                          <button 
+                          <button
                             onClick={() => updateQty(item.productId, item.variantSku, item.quantity + 1)}
                             className="p-1.5 hover:text-indigo-600 transition-colors"
                           >
@@ -101,7 +101,7 @@ export default function Cart() {
                     <div className="mt-4 flex items-center space-x-2">
                       <button
                         onClick={() => removeItem(item.productId, item.variantSku)}
-                        className="text-xs font-bold text-indigo-600 hover:text-red-500 transition-colors flex items-center"
+                        className="text-xs font-bold text-black hover:text-red-500 transition-colors flex items-center"
                       >
                         <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         Remove
@@ -137,14 +137,14 @@ export default function Cart() {
             <div className="mt-10">
               <button
                 onClick={handleCheckout}
-                className="w-full rounded-2xl bg-indigo-600 px-4 py-4 text-sm font-bold text-white shadow-lg transition-all hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] shadow-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="w-full rounded-2xl bg-black px-4 py-4 text-sm font-bold text-white shadow-lg transition-all hover:bg-black hover:scale-[1.02] active:scale-[0.98] shadow-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Proceed to Checkout
               </button>
             </div>
-            
+
             <div className="mt-6 text-center">
-               <p className="text-[10px] text-gray-400 font-medium">Secured with 256-bit SSL encryption</p>
+              <p className="text-[10px] text-gray-400 font-medium">Secured with 256-bit SSL encryption</p>
             </div>
           </section>
         </div>

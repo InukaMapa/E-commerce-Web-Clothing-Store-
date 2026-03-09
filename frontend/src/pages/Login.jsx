@@ -41,7 +41,7 @@ export default function Login() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear validation error when user begins typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -58,7 +58,7 @@ export default function Login() {
     const newErrors = {};
     if (!formData.email) newErrors.email = "Email is required";
     else if (!validateEmail(formData.email)) newErrors.email = "Invalid email format";
-    
+
     if (!formData.password) newErrors.password = "Password is required";
     else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
 
@@ -86,18 +86,16 @@ export default function Login() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-black border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-6 py-12 lg:px-8">
+    <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-6 py-4lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <div className="mx-auto h-12 w-12 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-          SL
-        </div>
-        <h2 className="mt-10 text-center text-3xl font-extrabold tracking-tight text-gray-900">
+
+        <h2 className="mt-1 text-center text-3xl font-extrabold tracking-tight text-gray-900">
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
@@ -138,9 +136,8 @@ export default function Login() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.email ? "ring-red-500" : "ring-gray-300"
-                  } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm px-3 transition-all outline-none`}
+                  className={`block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ${errors.email ? "ring-red-500" : "ring-gray-300"
+                    } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm px-3 transition-all outline-none`}
                   placeholder="name@example.com"
                 />
                 {errors.email && (
@@ -156,7 +153,7 @@ export default function Login() {
                   Password
                 </label>
                 <div className="text-sm">
-                  <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                  <a href="#" className="font-semibold text-black hover:text-black">
                     Forgot?
                   </a>
                 </div>
@@ -170,9 +167,8 @@ export default function Login() {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.password ? "ring-red-500" : "ring-gray-300"
-                  } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm px-3 transition-all outline-none`}
+                  className={`block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ${errors.password ? "ring-red-500" : "ring-gray-300"
+                    } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm px-3 transition-all outline-none`}
                   placeholder="••••••••"
                 />
                 {errors.password && (
@@ -186,9 +182,8 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex w-full justify-center rounded-md bg-indigo-600 px-3 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                  isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:scale-[1.01] active:scale-[0.99]"
-                }`}
+                className={`flex w-full justify-center rounded-md bg-black px-3 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:scale-[1.01] active:scale-[0.99]"
+                  }`}
               >
                 {isSubmitting ? (
                   <div className="flex items-center">
@@ -208,15 +203,13 @@ export default function Login() {
 
         <p className="mt-8 text-center text-sm text-gray-500">
           Don't have an account?{" "}
-          <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
+          <Link to="/register" className="font-semibold text-black   hover:text-black">
             Create one today
           </Link>
         </p>
       </div>
 
-      <footer className="mt-auto pt-10 text-center text-xs text-gray-400 font-medium">
-        &copy; {new Date().getFullYear()} Slaughter. All rights reserved.
-      </footer>
+
     </div>
   );
 }

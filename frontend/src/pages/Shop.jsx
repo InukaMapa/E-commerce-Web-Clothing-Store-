@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import ProductCard from "../components/ProductCard";
-
+import hero from "../assets/hero.png";
+import men from "../assets/men.png";
+import women from "../assets/women.png";
+import quote from "../assets/quote.png";
 /**
  * PRODUCTION-READY SHOP PAGE
  * Implementation Details:
@@ -16,10 +19,10 @@ export default function Shop() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Optional: Search/Filter state to enhance UX
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const navigate = useNavigate();
 
   // ── Data Fetching ───────────────────────────────────────────────────────
@@ -44,7 +47,7 @@ export default function Shop() {
   }, []);
 
   // Filter products locally for instant UX (can be offloaded to API for scale)
-  const filteredProducts = products.filter(p => 
+  const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -71,7 +74,7 @@ export default function Shop() {
         </div>
         <h2 className="text-xl font-bold text-gray-900">Something went wrong</h2>
         <p className="mt-2 max-w-sm text-gray-600">{error}</p>
-        <button 
+        <button
           onClick={fetchProducts}
           className="mt-6 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
         >
@@ -83,61 +86,176 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header / Hero Section */}
-      <header className="bg-gray-50 border-b border-gray-200 py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
-            Latest Collection
+      {/* ─── Announcement Bar ─── */}
+      <div className="bg-black text-[10px] uppercase tracking-[0.2em] text-white py-2 px-4 text-center border-t border-white/10">
+        Don't miss out on our exclusive special offer — Enjoy a massive 50% off on your favorite items! Hurry, this limited-time deal won't last long!
+      </div>
+
+      {/* ─── Hero Section ─── */}
+      <header className="relative h-[80vh] w-full overflow-hidden flex items-center justify-center">
+        <img
+          src={hero}
+          alt="Hero background"
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.4]"
+        />
+        <div className="relative z-10 text-center text-white px-4">
+          <p className="font-sans text-[10px] uppercase tracking-[0.4em] mb-4 opacity-80">Step into style — Find your perfect pair</p>
+          <h1 className="text-5xl md:text-7xl font-serif font-bold uppercase tracking-widest leading-none mb-8">
+            Trendy, <br /> Stylish, <br /> Brand New!
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-500">
-            Elevate your wardrobe with our meticulously crafted premium clothing.
-          </p>
-          
-          {/* Quick Search */}
-          <div className="mt-8 mx-auto max-w-md relative">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-full border-gray-300 py-3 pl-10 pr-4 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm outline-none"
-            />
-            <div className="absolute left-3 top-3.5 text-gray-400">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
+          <button className="bg-white text-black px-8 py-3 text-[14px] uppercase font-bold tracking-widest hover:bg-black hover:text-white transition-all duration-300">
+            Shop Now
+          </button>
         </div>
       </header>
 
-      {/* Product Grid */}
-      <main className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-20">
-            <h3 className="text-lg font-medium text-gray-900">No products found</h3>
-            <p className="mt-1 text-sm text-gray-500">Try adjusting your search terms or check back later.</p>
+      {/* ─── Latest Arrivals Section ─── */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="flex items-end justify-between mb-12">
+          <div>
+            <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black">Latest Arrivals</h2>
+            <p className="text-xs text-gray-400 uppercase tracking-widest mt-2">Discover Our Latest Arrivals And Timeless Classics.</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        )}
-      </main>
+          <button className="bg-black text-white px-6 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-800 transition-all">
+            Shop All
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          {products.slice(0, 4).map((product) => (
+            <ProductCard key={product._id} product={product} />
+          ))}
+        </div>
+      </section>
 
-      {/* Footer / Newsletter Placeholder */}
-      <section className="bg-indigo-900 py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h2 className="text-2xl font-bold">Stay in Style</h2>
-          <p className="mt-2 text-indigo-200">Get early access to drops and exclusive offers.</p>
-          <div className="mt-8 mx-auto flex max-w-xs space-x-2">
-            <input type="email" placeholder="Email" className="flex-1 rounded-md px-3 py-2 text-sm text-gray-900 outline-none" />
-            <button className="rounded-md bg-indigo-500 px-4 py-2 text-sm font-bold shadow-sm transition-colors hover:bg-indigo-400">Join</button>
+      {/* ─── Gender Categories ─── */}
+      <section className="grid grid-cols-1 md:grid-cols-2 h-[600px] w-full">
+        <div className="relative group cursor-pointer overflow-hidden">
+          <img
+            src={men}
+            alt="Shop Men"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 brightness-75"
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
+            <h2 className="text-4xl font-serif font-bold uppercase tracking-widest mb-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">Shop Men</h2>
+            <button className="bg-white text-black px-8 py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500">
+              View Products
+            </button>
+          </div>
+        </div>
+        <div className="relative group cursor-pointer overflow-hidden">
+          <img
+            src={women}
+            alt="Shop Women"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 brightness-75"
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
+            <h2 className="text-4xl font-serif font-bold uppercase tracking-widest mb-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">Shop Women</h2>
+            <button className="bg-white text-black px-8 py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500">
+              View Products
+            </button>
           </div>
         </div>
       </section>
+
+      {/* ─── T-Shirts Collection ─── */}
+      <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+        <div className="mb-12">
+          <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black mb-2">T-Shirts Collection</h2>
+          <p className="text-xs text-gray-400 uppercase tracking-widest">Discover Our T-Shirts Collection</p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
+          <div className="flex items-center space-x-2">
+            {['Unisex', 'Men', 'Women'].map((filter) => (
+              <button
+                key={filter}
+                className={`px-6 py-2 text-[10px] uppercase font-bold tracking-[0.2em] border transition-all ${filter === 'Unisex' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-200 hover:border-black'
+                  }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+          <button className="text-[10px] uppercase font-bold tracking-widest border-b border-black pb-1 hover:opacity-60 transition-opacity">
+            View All T-Shirts Collection
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          {products.slice(0, 4).map((product) => (
+            <ProductCard key={`${product._id}-collection`} product={product} />
+          ))}
+        </div>
+      </section>
+
+      {/* ─── Quote Section ─── */}
+      <section className="relative h-[400px] w-full flex items-center justify-center text-white overflow-hidden">
+        <img
+          src={quote}
+          alt="Quote background"
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.3]"
+        />
+        <div className="relative z-10 max-w-4xl text-center px-4">
+          <h2 className="text-2xl md:text-3xl font-sans font-bold uppercase tracking-[0.2em] leading-relaxed mb-6 italic">
+            "Style is a way to say who you are without having to speak."
+          </h2>
+          <p className="text-xs uppercase tracking-[0.4em] opacity-80">— Rachel Zoe</p>
+        </div>
+      </section>
+
+      {/* ─── Footer / Newsletter ─── */}
+      <footer className="bg-black text-white pt-24 pb-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+              <div>
+                <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Information</h3>
+                <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
+                  {['FAQ', 'About Us', 'Privacy', 'Terms & Conditions', 'Delivery Details', 'Returns Policy', 'Locations', 'Promotions'].map(item => (
+                    <li key={item}><a href="#" className="hover:text-gray-400">{item}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Account</h3>
+                <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
+                  {['My Account', 'Order History', 'Wishlist', 'Size Guides'].map(item => (
+                    <li key={item}><a href="#" className="hover:text-gray-400">{item}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Categories</h3>
+                <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
+                  {['Dresses', 'Tops & Tees', 'Pants', 'Skirts'].map(item => (
+                    <li key={item}><a href="#" className="hover:text-gray-400">{item}</a></li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-4">Sign up for the FOA newsletter</h3>
+              <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-8">Be the first to know about our new collections and promotions.</p>
+              <div className="flex gap-4">
+                <input
+                  type="email"
+                  placeholder="EMAIL"
+                  className="flex-1 bg-transparent border-b border-white/20 py-3 text-[10px] uppercase tracking-widest outline-none focus:border-white transition-colors"
+                />
+                <button className="bg-white text-black px-10 py-3 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-200 transition-colors">
+                  Subscribe
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 pt-8 text-center">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-white">© 2026 Slaughter All Rights Reserved</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
