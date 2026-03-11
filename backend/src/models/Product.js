@@ -15,6 +15,13 @@ const productSchema = new mongoose.Schema({
   images: [String],
   variants: [variantSchema],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected", "suspended"],
+    default: "pending",
+  },
+  category: String,
+  tags: [String],
 }, { timestamps: true });
 
 module.exports = mongoose.model("Product", productSchema);

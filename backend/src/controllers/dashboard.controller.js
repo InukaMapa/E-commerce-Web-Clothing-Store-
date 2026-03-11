@@ -7,11 +7,11 @@ const dashboardService = require("../services/dashboard.service");
 const getQueryDates = (from, to) => {
   const endDate = to ? new Date(to) : new Date();
   const startDate = from ? new Date(from) : new Date(new Date().setDate(endDate.getDate() - 30));
-  
+
   // Set time to start/end of day for inclusive match
   startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
-  
+
   return { startDate, endDate };
 };
 
@@ -20,15 +20,16 @@ const getQueryDates = (from, to) => {
 // ---------------------------------------------------------------------------
 exports.getAlerts = async (req, res) => {
   try {
+    const isProducer = req.user.role === "producer";
+    const query = isProducer ? { createdBy: req.user.id } : {};
+
     // ── 1. Identify low stock variants ────────────────────────────────────
-    // Fetch all products to filter variants by comparing fields in JS
-    const allProducts = await Product.find().select("name variants price").lean();
+    const products = await Product.find(query).select("name variants createdBy").lean();
 
     const alerts = [];
-    for (const p of allProducts) {
+    for (const p of products) {
       if (!p.variants) continue;
       for (const v of p.variants) {
-        // Compare stock with threshold per variant
         if (v.stock <= (v.lowStockThreshold || 5)) {
           alerts.push({
             productId: p._id,
@@ -44,9 +45,6 @@ exports.getAlerts = async (req, res) => {
       }
     }
 
-    // ── 2. High Demand Placeholder ────────────────────────────────────────
-    // In a real system, you'd calculate this by checking order frequency 
-    // over the last 24h/7d. For now, returning a static placeholder.
     const demand = [
       { productName: "Classic T-Shirt", trend: "UP", velocity: "12 units/hr" },
       { productName: "Denim Jacket", trend: "STABLE", velocity: "3 units/hr" }
@@ -66,7 +64,6 @@ exports.getAlerts = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
-      data: null
     });
   }
 };
@@ -78,8 +75,9 @@ exports.getKPIs = async (req, res) => {
   try {
     const { from, to } = req.query;
     const { startDate, endDate } = getQueryDates(from, to);
+    const producerId = req.user.role === "producer" ? req.user.id : null;
 
-    const kpis = await dashboardService.getSummaryKPIs(startDate, endDate);
+    const kpis = await dashboardService.getSummaryKPIs(startDate, endDate, producerId);
 
     return res.status(200).json({
       success: true,
@@ -91,7 +89,6 @@ exports.getKPIs = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
-      data: null,
     });
   }
 };
@@ -103,16 +100,16 @@ exports.getSalesTrend = async (req, res) => {
   try {
     const { from, to, groupBy = "day" } = req.query;
     const { startDate, endDate } = getQueryDates(from, to);
+    const producerId = req.user.role === "producer" ? req.user.id : null;
 
     if (!["day", "week", "month"].includes(groupBy)) {
       return res.status(400).json({
         success: false,
         message: "Invalid groupBy value. Use day, week, or month.",
-        data: null,
       });
     }
 
-    const trend = await dashboardService.getSalesTrend(startDate, endDate, groupBy);
+    const trend = await dashboardService.getSalesTrend(startDate, endDate, groupBy, producerId);
 
     return res.status(200).json({
       success: true,
@@ -124,7 +121,6 @@ exports.getSalesTrend = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
-      data: null,
     });
   }
 };
@@ -136,8 +132,9 @@ exports.getTopProducts = async (req, res) => {
   try {
     const { from, to, limit = 10 } = req.query;
     const { startDate, endDate } = getQueryDates(from, to);
+    const producerId = req.user.role === "producer" ? req.user.id : null;
 
-    const products = await dashboardService.getTopProducts(startDate, endDate, parseInt(limit));
+    const products = await dashboardService.getTopProducts(startDate, endDate, parseInt(limit), producerId);
 
     return res.status(200).json({
       success: true,
@@ -149,7 +146,6 @@ exports.getTopProducts = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
-      data: null,
     });
   }
 };
