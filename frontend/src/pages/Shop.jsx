@@ -71,18 +71,33 @@ export default function Shop() {
   }, []);
 
   // ─────────────────────────────────────────────
-  // Filter Products
+  // Group & Filter Logic
   // ─────────────────────────────────────────────
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const groupProducts = (items) => {
+    const grouped = {};
+    items.forEach(p => {
+      const key = p.name.trim().toLowerCase();
+      if (!grouped[key]) {
+        grouped[key] = { ...p, variants: [...(p.variants || [])] };
+      } else {
+        // Collect all variants from all products with same name
+        grouped[key].variants = [...grouped[key].variants, ...(p.variants || [])];
+        // Collect all images
+        grouped[key].images = Array.from(new Set([...(grouped[key].images || []), ...(p.images || [])]));
+        // Keep the lowest price if they differ
+        if (p.price < grouped[key].price) grouped[key].price = p.price;
+      }
+    });
+    return Object.values(grouped);
+  };
 
-  // ─────────────────────────────────────────────
-  // Convert Recommendation IDs → Product Objects
-  // ─────────────────────────────────────────────
-  const recommendedProducts = products.filter(product =>
+  const filteredProducts = groupProducts(products.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  ));
+
+  const recommendedProducts = groupProducts(products.filter(product =>
     recommendedIds.includes(product._id)
-  );
+  ));
 
   // ─────────────────────────────────────────────
   // Loading State
@@ -195,7 +210,7 @@ export default function Shop() {
 
           {filteredProducts.slice(0, 4).map((product) => (
 
-            <ProductCard key={product._id} product={product} />
+            <ProductCard key={product.name} product={product} />
 
           ))}
 

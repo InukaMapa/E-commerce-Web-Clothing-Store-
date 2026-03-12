@@ -44,9 +44,8 @@ const AdminProductManagement = () => {
     description: "",
     price: 0,
     category: "",
-    dimension: "",
     images: [],
-    stock: 0,
+    variants: [], // Changed from dimension/stock to list
     status: "approved",
   });
 
@@ -61,9 +60,8 @@ const AdminProductManagement = () => {
         description: product.description || "",
         price: product.price,
         category: product.category || "",
-        dimension: dimension,
+        variants: product.variants || [], // Use actual variants
         images: product.images || [],
-        stock: totalStock,
         status: product.status || "approved",
       });
       setImagePreview(product.images?.[0] || "");
@@ -75,9 +73,8 @@ const AdminProductManagement = () => {
         description: "",
         price: 0,
         category: "",
-        dimension: "",
+        variants: [{ size: "", color: "Default", stock: 0, sku: "" }],
         images: [],
-        stock: 0,
         status: "approved",
       });
       setImagePreview("");
@@ -95,7 +92,6 @@ const AdminProductManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Build the payload matching the existing schema
       const payload = {
         name: formData.name,
         description: formData.description,
@@ -103,14 +99,7 @@ const AdminProductManagement = () => {
         category: formData.category,
         images: formData.images.filter((img) => img.trim() !== ""),
         status: formData.status,
-        variants: [
-          {
-            size: formData.dimension,
-            color: "Default",
-            stock: formData.stock,
-            sku: formData.productId,
-          },
-        ],
+        variants: formData.variants, // Pass all variants
       };
 
       if (editingProduct) {
@@ -135,8 +124,9 @@ const AdminProductManagement = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       const imageUrl = res.data.data.url;
-      setFormData((prev) => ({ ...prev, images: [imageUrl] }));
-      setImagePreview(imageUrl);
+      // Append to images array instead of replacing
+      setFormData((prev) => ({ ...prev, images: [...prev.images, imageUrl] }));
+      if (!imagePreview) setImagePreview(imageUrl);
     } catch (err) {
       alert("Image upload failed. Please try again.");
     } finally {
@@ -157,9 +147,33 @@ const AdminProductManagement = () => {
     if (file) handleImageUpload(file);
   };
 
-  const removeImage = () => {
-    setFormData((prev) => ({ ...prev, images: [] }));
-    setImagePreview("");
+  const removeImage = (index) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData((prev) => ({ ...prev, images: newImages }));
+    if (imagePreview === formData.images[index]) {
+      setImagePreview(newImages[0] || "");
+    }
+  };
+
+  const handleVariantChange = (index, field, value) => {
+    const newVariants = [...formData.variants];
+    newVariants[index][field] = value;
+    setFormData({ ...formData, variants: newVariants });
+  };
+
+  const addVariant = () => {
+    setFormData({
+      ...formData,
+      variants: [
+        ...formData.variants,
+        { size: "", color: "Default", stock: 0, sku: formData.productId },
+      ],
+    });
+  };
+
+  const removeVariant = (index) => {
+    const newVariants = formData.variants.filter((_, i) => i !== index);
+    setFormData({ ...formData, variants: newVariants });
   };
 
   const fetchProducts = async () => {
@@ -529,111 +543,117 @@ const AdminProductManagement = () => {
                 </div>
               </div>
 
-              {/* Row: Dimension + Units Quantity */}
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 flex items-center space-x-2">
+              {/* Variants Section */}
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
                     <Ruler size={12} />
-                    <span>Product Dimension (Size)</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.dimension}
-                    onChange={(e) =>
-                      setFormData({ ...formData, dimension: e.target.value })
-                    }
-                    disabled={!formData.category}
-                    className="w-full border border-black/10 px-5 py-4 text-xs font-bold uppercase tracking-widest outline-none focus:border-black transition-all bg-white disabled:bg-gray-50 disabled:text-gray-300"
+                    <span>Variants (Size & Stock)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addVariant}
+                    className="text-black hover:underline"
                   >
-                    <option value="" disabled>
-                      {formData.category ? "SELECT SIZE" : "CHOOSE CATEGORY FIRST"}
-                    </option>
-                    {(DIMENSION_MAP[formData.category] || []).map((size) => (
-                      <option key={size} value={size}>{size}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 flex items-center space-x-2">
-                    <Box size={12} />
-                    <span>Units Quantity</span>
-                  </label>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    value={formData.stock || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        stock: Number(e.target.value),
-                      })
-                    }
-                    className="w-full border border-black/10 px-5 py-4 text-sm font-bold outline-none focus:border-black transition-all"
-                  />
-                </div>
+                    + ADD VARIANT
+                  </button>
+                </label>
+                
+                {formData.variants.map((v, idx) => (
+                  <div key={idx} className="grid grid-cols-3 gap-4 bg-gray-50 p-4 border border-black/5 relative group/variant">
+                    <div>
+                      <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Size</label>
+                      <select
+                        required
+                        value={v.size}
+                        onChange={(e) => handleVariantChange(idx, "size", e.target.value)}
+                        className="w-full bg-transparent text-[10px] font-bold uppercase outline-none"
+                      >
+                        <option value="" disabled>SIZE</option>
+                        {(DIMENSION_MAP[formData.category] || []).map((size) => (
+                          <option key={size} value={size}>{size}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Stock</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={v.stock}
+                        onChange={(e) => handleVariantChange(idx, "stock", Number(e.target.value))}
+                        className="w-full bg-transparent text-[10px] font-bold outline-none"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-1 block">SKU</label>
+                        <input
+                          type="text"
+                          value={v.sku}
+                          onChange={(e) => handleVariantChange(idx, "sku", e.target.value)}
+                          className="w-full bg-transparent text-[8px] font-mono outline-none"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeVariant(idx)}
+                        className="text-red-500 opacity-0 group-hover/variant:opacity-100 transition-opacity"
+                      >
+                        <Trash size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                
+                {formData.variants.length === 0 && (
+                  <p className="text-[9px] text-gray-400 italic">No variants added yet. Please add at least one.</p>
+                )}
               </div>
 
-              {/* Product Image */}
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 flex items-center space-x-2">
+              {/* Product Gallery */}
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 flex items-center space-x-2">
                   <ImagePlus size={12} />
-                  <span>Product Image</span>
+                  <span>Product Gallery (Multiple Images Support)</span>
                 </label>
 
-                {imagePreview ? (
-                  <div className="border border-black/10 p-4 bg-gray-50 relative group">
-                    <img
-                      src={imagePreview.startsWith("/uploads") ? `http://localhost:5000${imagePreview}` : imagePreview}
-                      alt="Product Preview"
-                      className="w-full h-52 object-contain"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeImage}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                    >
-                      <Trash size={14} />
-                    </button>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center mt-3">
-                      Image Uploaded Successfully
-                    </p>
-                  </div>
-                ) : (
-                  <div
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleFileDrop}
-                    className="border-2 border-dashed border-black/10 hover:border-black/30 transition-all cursor-pointer bg-gray-50/50 hover:bg-gray-50"
-                  >
-                    <label className="flex flex-col items-center justify-center py-12 cursor-pointer">
-                      {uploading ? (
-                        <>
-                          <div className="w-10 h-10 border-2 border-black/20 border-t-black rounded-full animate-spin mb-4"></div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                            Uploading...
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <Upload size={28} className="text-gray-300 mb-4" />
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
-                            Click to browse or drag & drop
-                          </p>
-                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
-                            JPEG, PNG, WEBP — Max 5MB
-                          </p>
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                        disabled={uploading}
+                <div className="grid grid-cols-4 gap-4">
+                  {formData.images.map((img, idx) => (
+                    <div key={idx} className="relative group aspect-square bg-gray-50 border border-black/5 overflow-hidden">
+                      <img
+                        src={img.startsWith("/uploads") ? `http://localhost:5000${img}` : img}
+                        alt=""
+                        className="w-full h-full object-cover"
                       />
-                    </label>
-                  </div>
-                )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash size={10} />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  <label className="border-2 border-dashed border-black/10 hover:border-black/30 transition-all cursor-pointer bg-gray-50/50 hover:bg-gray-50 flex flex-col items-center justify-center aspect-square">
+                    {uploading ? (
+                      <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <Upload size={16} className="text-gray-300 mb-1" />
+                        <span className="text-[8px] font-bold text-gray-400 uppercase">Add Image</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
               </div>
 
               {/* Status */}

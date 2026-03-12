@@ -8,9 +8,9 @@ const {
   updateOrderStatus,
 } = require("../controllers/order.controller");
 
-// ── Customer ──────────────────────────────────────────────────────────────
-router.post("/checkout", auth(["customer"]), checkout);
-router.get("/my", auth(["customer"]), getMyOrders);
+// ── Customer / Testing ──────────────────────────────────────────────────────
+router.post("/checkout", auth(["customer", "admin", "producer"]), checkout);
+router.get("/my", auth(["customer", "admin", "producer"]), getMyOrders);
 
 // ── Admin ─────────────────────────────────────────────────────────────────
 router.get("/", auth(["admin"]), getAllOrders);

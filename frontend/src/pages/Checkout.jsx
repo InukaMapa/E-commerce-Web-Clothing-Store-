@@ -2,25 +2,25 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 import { useCart } from "../cart/CartContext";
+import { useAuth } from "../auth/AuthContext";
 
-/**
- * PRODUCTION-READY CHECKOUT PAGE
- * Key Implementation:
- * - Atomic order submission to POST /api/orders/checkout
- * - Intelligent cart clearing on success
- * - Safety redirect if users land on checkout with an empty bag
- * - Polished success/error state UI with auto-redirect
- * - Responsive order summary visualization
- */
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+function resolveImage(img) {
+  if (!img) return null;
+  return img.startsWith("/uploads") ? `${BASE_URL}${img}` : img;
+}
+
 export default function Checkout() {
   const { items, total, clear } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [orderId, setOrderId] = useState(null);
+  const [savedSummary, setSavedSummary] = useState(null);
 
-  // Safety: Redirect if cart is empty (unless we just placed an order)
   useEffect(() => {
     if (items.length === 0 && !orderId) {
       const timer = setTimeout(() => navigate("/"), 3000);
@@ -30,16 +30,15 @@ export default function Checkout() {
 
   const handleSubmitOrder = async () => {
     if (items.length === 0) return;
-
     try {
       setLoading(true);
       setError(null);
-
-      // Backend expects: items: [{productId, variantSku, quantity}]
-      // Prices are re-fetched server-side for security
+      const summary = { items: [...items], total };
+      
       const payload = {
         items: items.map((i) => ({
           productId: i.productId,
+          variantId: i.variantId,
           variantSku: i.variantSku,
           quantity: i.quantity,
         })),
@@ -48,140 +47,145 @@ export default function Checkout() {
       const res = await api.post("/api/orders/checkout", payload);
 
       if (res.data?.success) {
+        setSavedSummary(summary);
         setOrderId(res.data.data.order._id);
-        clear(); // Wipe cart context & localStorage
-
-        // Redirect home after a 2.5s delay
-        setTimeout(() => {
-          navigate("/");
-        }, 2500);
+        clear();
       }
     } catch (err) {
-      console.error("Checkout submission failed:", err);
-      const msg = err.response?.data?.message || "Failed to process your order. Please try again.";
+      const msg = err.response?.data?.message || "Checkout failed. Please try again.";
       setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Render States ──────────────────────────────────────────────────────
+  const handleReturnAction = () => {
+    if (user?.role === 'admin') navigate('/admin/dashboard');
+    else if (user?.role === 'producer') navigate('/producer/dashboard');
+    else navigate('/');
+  };
 
-  // 1. Success State
-  if (orderId) {
+  if (orderId && savedSummary) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 text-center">
-        <div className="mb-6 rounded-full bg-green-100 p-4 animate-bounce shadow-sm">
-          <svg className="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h1 className="text-3xl font-extrabold text-gray-900">Order Confirmed!</h1>
-        <p className="mt-2 text-gray-500 font-medium">Thank you for choosing Slaughter.</p>
-        <div className="mt-8 rounded-lg bg-white p-6 shadow-sm border border-gray-100">
-          <p className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-1">Order ID</p>
-          <p className="text-xs font-mono font-bold text-gray-900">{orderId}</p>
-        </div>
-        <p className="mt-10 text-xs text-gray-400 font-medium">Redirecting you to the shop in a moment...</p>
-      </div>
-    );
-  }
-
-  // 2. Empty Cart Error State
-  if (items.length === 0) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 text-center">
-        <h2 className="text-xl font-bold text-gray-900">Your bag is empty</h2>
-        <p className="mt-2 text-gray-500">Redirecting to shop...</p>
-        <Link to="/" className="mt-6 text-black font-bold hover:underline">Return manually</Link>
-      </div>
-    );
-  }
-
-  // 3. Main Checkout UI
-  return (
-    <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Finalize Order</h1>
-          <p className="mt-2 text-xs text-gray-500">Confirm your items and proceed to fulfillment.</p>
-        </div>
-
-        {error && (
-          <div className="mb-8 rounded-xl bg-red-50 border border-red-200 p-4 shadow-sm">
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-red-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center py-20 px-4">
+        <div className="w-full max-w-lg bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100 flex flex-col">
+          <div className="bg-black text-white p-8 text-center">
+            <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
-              <p className="text-xs font-semibold text-red-800">{error}</p>
             </div>
+            <h1 className="text-2xl font-black uppercase tracking-widest">Order Success</h1>
+            <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-tighter">Order ID: {orderId}</p>
           </div>
-        )}
 
-        <div className="bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-100">
-          {/* Order Summary Table */}
-          <div className="p-8">
-            <h2 className="text-base font-bold text-gray-900 mb-6">Review Bag</h2>
-            <ul className="divide-y divide-gray-100">
-              {items.map((item) => (
-                <li key={`${item.productId}-${item.variantSku}`} className="flex py-6 justify-between items-center">
-                  <div className="flex items-center">
-                    <img src={item.image} alt={item.name} className="h-14 w-14 rounded-lg object-cover border border-gray-200" />
-                    <div className="ml-4">
+          <div className="p-8 flex-1">
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6 pb-2 border-b">Purchase Summary</h2>
+            <ul className="space-y-4">
+              {savedSummary.items.map((item, idx) => (
+                <li key={idx} className="flex justify-between items-start">
+                  <div className="flex space-x-4">
+                    <img src={resolveImage(item.image)} alt="" className="w-12 h-12 rounded-lg object-cover bg-gray-50" />
+                    <div>
                       <p className="text-xs font-bold text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-500">{item.variantSku} x {item.quantity}</p>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Size: {item.variantName || item.variantSku} x {item.quantity}</p>
                     </div>
                   </div>
-                  <p className="text-xs font-bold text-gray-900">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="text-xs font-bold text-gray-900 text-right">Rs. {(item.price * item.quantity).toFixed(2)}</p>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-8 border-t border-gray-100 pt-8 space-y-4">
-              <div className="flex justify-between text-xs text-gray-600">
-                <p>Bag Subtotal</p>
-                <p className="font-bold">Rs. {total.toFixed(2)}</p>
+            <div className="mt-8 pt-8 border-t border-dashed border-gray-200 space-y-3 text-xs">
+              <div className="flex justify-between text-gray-500 font-bold uppercase tracking-widest text-[9px]">
+                <span>Subtotal</span>
+                <span>Rs. {savedSummary.total.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-xs text-gray-600">
-                <p>Shipping</p>
-                <p className="font-bold text-green-600">{total > 100 ? 'FREE' : 'Rs. 15.00'}</p>
+              <div className="flex justify-between text-gray-500 font-bold uppercase tracking-widest text-[9px]">
+                <span>Shipping</span>
+                <span className="text-green-600">{savedSummary.total > 100 ? 'FREE' : 'Rs. 15.00'}</span>
               </div>
-              <div className="flex justify-between items-center border-t border-gray-200 pt-6">
-                <p className="text-xl font-black text-gray-900 leading-none">Total Due</p>
-                <p className="text-2xl font-black text-black">
-                  Rs. {(total > 100 ? total : total + 15).toFixed(2)}
-                </p>
+              <div className="flex justify-between items-center pt-4">
+                <span className="text-sm font-black uppercase tracking-widest">Total Paid</span>
+                <span className="text-xl font-black">Rs. {(savedSummary.total > 100 ? savedSummary.total : savedSummary.total + 15).toFixed(2)}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 p-8 border-t border-gray-100">
-            <button
-              onClick={handleSubmitOrder}
-              disabled={loading}
-              className={`flex w-full items-center justify-center rounded-2xl bg-black px-8 py-4 text-xs font-bold text-white transition-all hover:bg-black hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${loading ? "opacity-70 cursor-not-allowed" : "shadow-lg shadow-black"
-                }`}
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
-                </div>
-              ) : (
-                "Complete Purchase"
-              )}
+          <div className="p-8 bg-gray-50 border-t border-gray-100 flex flex-col space-y-4">
+            <button onClick={handleReturnAction} className="w-full bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform">
+              {user?.role === 'customer' || !user ? 'Return to Shop' : 'Return to Dashboard'}
             </button>
-            <p className="mt-4 text-center text-xs text-gray-400 font-medium">By completing your order, you agree to our Terms of Use.</p>
+            <p className="text-center text-[9px] text-gray-400 font-bold uppercase tracking-widest">A confirmation email has been sent to you.</p>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        <div className="mt-8 flex justify-center items-center space-x-6 text-gray-400 grayscale opacity-50">
-          <svg className="h-6" viewBox="0 0 38 24" fill="currentColor"><path d="M12 24c-6.627 0-12-5.373-12-12s5.373-12 12-12 12 5.373 12 12-5.373 12-12 12zm14-12c0-3.132 1.055-6.012 2.825-8.318-2.204-1.077-4.665-1.682-7.225-1.682-1.556 0-3.052.221-4.471.632 2.665 1.776 4.471 4.793 4.471 8.368 0 3.575-1.806 6.592-4.471 8.368 1.419.411 2.915.632 4.471.632 2.56 0 5.021-.605 7.225-1.682-1.77 2.306-2.825 5.186-2.825 8.318z" /></svg>
-          <svg className="h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2l-6.5 6s4 6.5 4 6.5l2.5-2.5 4 4.5h6l-10-14.5zm-5 13.5l1.5 1.5-1.5 1.5-1.5-1.5 1.5-1.5z" /></svg>
-          <span className="text-[10px] uppercase font-black tracking-tighter">Secure Checkout</span>
+  if (items.length === 0) return <div className="h-screen flex items-center justify-center">Redirecting...</div>;
+
+  return (
+    <div className="bg-gray-50 min-h-screen py-12 px-4 shadow-inner">
+      <div className="mx-auto max-w-2xl">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 group">
+            Checkout 
+            <span className="block w-8 h-1 bg-black mx-auto mt-2 transition-all group-hover:w-16"></span>
+          </h1>
+          <p className="mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Secure Payment Processing</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-100 animate-shake">
+            Error: {error}
+          </div>
+        )}
+
+        <div className="bg-white shadow-2xl rounded-[2.5rem] overflow-hidden border border-gray-100">
+          <div className="p-10">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-8 pb-2 border-b">Review Your Order</h2>
+            <ul className="divide-y divide-gray-50">
+              {items.map((item, idx) => (
+                <li key={idx} className="flex py-6 justify-between items-center group">
+                  <div className="flex items-center space-x-5">
+                    <img src={resolveImage(item.image)} alt="" className="h-16 w-16 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-900">{item.name}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5 tracking-tighter">Size: {item.variantName || item.variantSku} — Qty: {item.quantity}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs font-black text-gray-900">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-10 pt-10 border-t border-gray-100 space-y-4">
+               <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Amount Due</span>
+                <span className="text-3xl font-black tracking-tighter text-black">Rs. {(total > 100 ? total : total + 15).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleSubmitOrder} 
+              disabled={loading} 
+              className={`w-full mt-12 bg-black text-white py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:shadow-none hover:translate-y-1 transition-all active:scale-[0.98] ${loading ? "opacity-50" : ""}`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  <span>Processing...</span>
+                </div>
+              ) : "Confirm & Pay Now"}
+            </button>
+            
+            <div className="mt-8 flex items-center justify-center space-x-4 opacity-20 grayscale">
+               <div className="w-10 h-6 bg-gray-400 rounded"></div>
+               <div className="w-10 h-6 bg-gray-400 rounded"></div>
+               <div className="w-10 h-6 bg-gray-400 rounded"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -18,7 +18,7 @@ exports.checkout = async (req, res) => {
     }
 
     for (let i = 0; i < items.length; i++) {
-      const { productId, variantSku, quantity } = items[i];
+      const { productId, variantSku, variantId, quantity } = items[i];
 
       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
         return res.status(400).json({
@@ -27,10 +27,11 @@ exports.checkout = async (req, res) => {
           data: null,
         });
       }
-      if (!variantSku || typeof variantSku !== "string") {
+      // Allow empty SKU if variantId is provided
+      if ((!variantSku || typeof variantSku !== "string") && !variantId) {
         return res.status(400).json({
           success: false,
-          message: `items[${i}].variantSku is required`,
+          message: `items[${i}].variantSku or variantId is required`,
           data: null,
         });
       }

@@ -12,6 +12,13 @@ import {
 } from "lucide-react";
 import api from "../../api/axios";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+function resolveImage(img) {
+  if (!img) return null;
+  return img.startsWith("/uploads") ? `${BASE_URL}${img}` : img;
+}
+
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +148,7 @@ const MyProducts = () => {
             <div className="h-64 bg-gray-50 relative overflow-hidden">
               {product.images?.[0] ? (
                 <img
-                  src={product.images[0]}
+                  src={resolveImage(product.images[0])}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />

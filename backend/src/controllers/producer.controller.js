@@ -1,4 +1,6 @@
 const Review = require("../models/Review");
+const Product = require("../models/Product");
+const Order = require("../models/Order");
 
 // ---------------------------------------------------------------------------
 // Dashboard Stats

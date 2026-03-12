@@ -23,7 +23,8 @@ export function CartProvider({ children }) {
     // item: { productId, name, image, variantSku, price, quantity }
     const next = [...items];
     const idx = next.findIndex(
-      (x) => x.productId === item.productId && x.variantSku === item.variantSku
+      (x) => x.productId === item.productId && 
+             (item.variantId ? x.variantId === item.variantId : x.variantSku === item.variantSku)
     );
     if (idx >= 0) next[idx].quantity += item.quantity;
     else next.push(item);
@@ -32,11 +33,14 @@ export function CartProvider({ children }) {
 
   const updateQty = (productId, variantSku, quantity) => {
     const next = items
-      .map((x) =>
-        x.productId === productId && x.variantSku === variantSku
+      .map((x) => {
+        const match = x.productId === productId && 
+                      (x.variantId ? x.variantId === (arguments[3] || x.variantId) : x.variantSku === variantSku);
+        // If variantId is passed as 4th arg, use it, else fallback to variantSku logic
+        return (x.productId === productId && (x.variantId ? x.variantId === arguments[3] : x.variantSku === variantSku))
           ? { ...x, quantity }
-          : x
-      )
+          : x;
+      })
       .filter((x) => x.quantity > 0);
     persist(next);
   };

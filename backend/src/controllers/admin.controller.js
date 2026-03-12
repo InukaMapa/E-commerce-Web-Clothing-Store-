@@ -4,9 +4,7 @@ const Order = require("../models/Order");
 const Category = require("../models/Category");
 const XLSX = require("xlsx");
 
-// ---------------------------------------------------------------------------
 // User Management
-// ---------------------------------------------------------------------------
 exports.getAllUsers = async (req, res) => {
     try {
         const users = await User.find({ role: "customer" }).select("-password");
@@ -35,9 +33,7 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-// ---------------------------------------------------------------------------
 // Producer Management
-// ---------------------------------------------------------------------------
 exports.getAllProducers = async (req, res) => {
     try {
         const producers = await User.find({ role: "producer" }).select("-password");
@@ -73,9 +69,7 @@ exports.suspendProducer = async (req, res) => {
     }
 };
 
-// ---------------------------------------------------------------------------
 // Product Management
-// ---------------------------------------------------------------------------
 exports.getAllProducts = async (req, res) => {
     try {
         const products = await Product.find().populate("createdBy", "name email");
@@ -113,9 +107,7 @@ exports.updateProductStatus = async (req, res) => {
     }
 };
 
-// ---------------------------------------------------------------------------
 // Category Management
-// ---------------------------------------------------------------------------
 exports.getCategories = async (req, res) => {
     try {
         const categories = await Category.find();
@@ -134,12 +126,13 @@ exports.createCategory = async (req, res) => {
     }
 };
 
-// ---------------------------------------------------------------------------
 // Order Management
-// ---------------------------------------------------------------------------
 exports.getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find().populate("user", "name email").sort({ createdAt: -1 });
+        const orders = await Order.find()
+            .populate("user", "name email")
+            .populate("items.productId", "name images price")
+            .sort({ createdAt: -1 });
         return res.status(200).json({ success: true, data: orders });
     } catch (err) {
         return res.status(500).json({ success: false, message: err.message });
@@ -149,16 +142,16 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+        const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true })
+            .populate("user", "name email")
+            .populate("items.productId", "name images price");
         return res.status(200).json({ success: true, data: order });
     } catch (err) {
         return res.status(500).json({ success: false, message: err.message });
     }
 };
 
-// ---------------------------------------------------------------------------
 // Inventory & Stats
-// ---------------------------------------------------------------------------
 exports.getInventory = async (req, res) => {
     try {
         const products = await Product.find().select("name variants status");
@@ -168,15 +161,22 @@ exports.getInventory = async (req, res) => {
     }
 };
 
+// Dashboard Stats
 exports.getDashboardStats = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         let match = { status: { $ne: "cancelled" } };
         
-        if (startDate || endDate) {
-            match.createdAt = {};
-            if (startDate) match.createdAt.$gte = new Date(startDate);
-            if (endDate) match.createdAt.$lte = new Date(endDate);
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            
+            match.createdAt = {
+                $gte: start,
+                $lte: end
+            };
         }
 
         const [userCount, producerCount, productCount, filteredOrderCount, filteredRevenue, lowStockProducts] = await Promise.all([
@@ -191,7 +191,6 @@ exports.getDashboardStats = async (req, res) => {
             Product.find({ "variants.stock": { $lte: 3 } }).select("name variants")
         ]);
 
-        // Flatten variants for easier stock alert handling
         const alerts = [];
         lowStockProducts.forEach(p => {
             p.variants.forEach(v => {
@@ -199,7 +198,7 @@ exports.getDashboardStats = async (req, res) => {
                     alerts.push({
                         productId: p._id,
                         name: p.name,
-                        sku: v.sku,
+                        sku: v.sku || 'N/A',
                         size: v.size,
                         color: v.color,
                         stock: v.stock
@@ -224,40 +223,62 @@ exports.getDashboardStats = async (req, res) => {
     }
 };
 
+exports.downloadFullReport = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    let match = {};
+    if (startDate && endDate) {
+      match.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
+
+    const orders = await Order.find(match).populate("user", "name email").lean();
+    
+    const data = orders.map(o => ({
+      ID: o._id.toString(),
+      Customer: o.user?.name || "Guest",
+      Email: o.user?.email || "N/A",
+      Status: o.status,
+      Amount: o.totalAmount,
+      Date: new Date(o.createdAt).toLocaleDateString()
+    }));
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Orders");
+    const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+    res.setHeader("Content-Disposition", "attachment; filename=Report.xlsx");
+    res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    return res.send(buf);
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.getSalesAnalytics = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         let match = { status: { $ne: "cancelled" } };
-        
-        if (startDate || endDate) {
-            match.createdAt = {};
-            if (startDate) match.createdAt.$gte = new Date(startDate);
-            if (endDate) match.createdAt.$lte = new Date(endDate);
-        }
-
-        // Determine grouping level: if range <= 60 days, group by day, else by month
-        let diffDays = 100; // default
         if (startDate && endDate) {
             const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
             const end = new Date(endDate);
-            diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            end.setHours(23, 59, 59, 999);
+            match.createdAt = { $gte: start, $lte: end };
         }
 
-        const groupFormat = diffDays <= 60 ? "%Y-%m-%d" : "%Y-%m";
-        
-        const sales = await Order.aggregate([
+        const trend = await Order.aggregate([
             { $match: match },
             {
                 $group: {
-                    _id: { $dateToString: { format: groupFormat, date: "$createdAt" } },
-                    revenue: { $sum: "$totalAmount" },
-                    count: { $sum: 1 }
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    revenue: { $sum: "$totalAmount" }
                 }
             },
-            { $sort: { "_id": 1 } }
+            { $sort: { _id: 1 } }
         ]);
 
-        return res.status(200).json({ success: true, data: sales });
+        return res.status(200).json({ success: true, data: trend });
     } catch (err) {
         return res.status(500).json({ success: false, message: err.message });
     }
@@ -265,63 +286,18 @@ exports.getSalesAnalytics = async (req, res) => {
 
 exports.getProductAnalytics = async (req, res) => {
     try {
-        const topProducts = await Order.aggregate([
+        const top = await Order.aggregate([
             { $unwind: "$items" },
             {
                 $group: {
                     _id: "$items.productId",
-                    soldQuantity: { $sum: "$items.quantity" },
-                    revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+                    sold: { $sum: "$items.quantity" }
                 }
             },
-            { $sort: { soldQuantity: -1 } },
-            { $limit: 10 },
-            {
-                $lookup: {
-                    from: "products",
-                    localField: "_id",
-                    foreignField: "_id",
-                    as: "details"
-                }
-            }
+            { $sort: { sold: -1 } },
+            { $limit: 10 }
         ]);
-        return res.status(200).json({ success: true, data: topProducts });
-    } catch (err) {
-        return res.status(500).json({ success: false, message: err.message });
-    }
-};
-exports.downloadFullReport = async (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;
-        let match = { status: { $ne: "cancelled" } };
-        
-        if (startDate || endDate) {
-            match.createdAt = {};
-            if (startDate) match.createdAt.$gte = new Date(startDate);
-            if (endDate) match.createdAt.$lte = new Date(endDate);
-        }
-
-        const orders = await Order.find(match).populate("user", "name email");
-        
-        const reportData = orders.map(order => ({
-            "Order ID": order._id.toString(),
-            "Date": order.createdAt.toISOString().split("T")[0],
-            "Customer": order.user?.name || "GUEST",
-            "Email": order.user?.email || "N/A",
-            "Total Amount": `Rs. ${order.totalAmount}`,
-            "Items": order.items.map(i => `${i.name} (x${i.quantity})`).join(", "),
-            "Status": order.status.toUpperCase()
-        }));
-
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(reportData);
-        XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
-        
-        const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
-        
-        res.setHeader("Content-Disposition", `attachment; filename=Platform_Report_${new Date().toISOString().split("T")[0]}.xlsx`);
-        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        return res.send(buf);
+        return res.status(200).json({ success: true, data: top });
     } catch (err) {
         return res.status(500).json({ success: false, message: err.message });
     }

@@ -24,51 +24,69 @@ exports.checkout = async (userId, items) => {
       throw { status: 404, message: `Product ${item.productId} not found` };
     }
 
-    const variant = product.variants.find((v) => v.sku === item.variantSku);
+    // Resilience: Try to find variant by SKU first, then by ID if SKU is empty/missing
+    let variant = product.variants.find((v) => v.sku === item.variantSku);
+    
+    // Fallback for missing SKUs in DB: Match by ID if possible
+    if (!variant && item.variantId) {
+      variant = product.variants.find((v) => v._id.toString() === item.variantId);
+    }
+
     if (!variant) {
       throw {
         status: 404,
-        message: `Variant SKU "${item.variantSku}" not found on product "${product.name}"`,
+        message: `Variant "${item.variantSku || 'selected'}" not found on product "${product.name}"`,
       };
     }
 
     if (variant.stock < item.quantity) {
       throw {
         status: 400,
-        message: `Insufficient stock for "${product.name}" (SKU: ${item.variantSku}). Available: ${variant.stock}, Requested: ${item.quantity}`,
+        message: `Insufficient stock for "${product.name}". Available: ${variant.stock}, Requested: ${item.quantity}`,
       };
     }
 
-    // Use the server-side price, never trust the client
     const lineTotal = product.price * item.quantity;
     totalAmount += lineTotal;
 
     orderItems.push({
       productId: product._id,
-      variantSku: item.variantSku,
+      variantSku: variant.sku || "N/A",
+      variantName: variant.size, // helper
       quantity: item.quantity,
       price: product.price,
     });
   }
 
   // ── 3. Deduct stock atomically per variant ──────────────────────────────
-  // Uses MongoDB's positional operator to target the exact variant sub-doc.
-  // If any update fails (concurrent purchase drained stock), we throw.
   for (const item of orderItems) {
+    // Target specific variant in array
     const result = await Product.updateOne(
       {
         _id: item.productId,
-        "variants.sku": item.variantSku,
+        "variants.size": item.variantName, // Using size as secondary anchor since SKUs are empty
         "variants.stock": { $gte: item.quantity },
       },
       { $inc: { "variants.$.stock": -item.quantity } }
     );
 
     if (result.modifiedCount === 0) {
-      throw {
-        status: 409,
-        message: `Stock changed for SKU "${item.variantSku}" during checkout. Please try again.`,
-      };
+      // Fallback update by SKU if available
+      const skuResult = await Product.updateOne(
+        {
+          _id: item.productId,
+          "variants.sku": item.variantSku,
+          "variants.stock": { $gte: item.quantity },
+        },
+        { $inc: { "variants.$.stock": -item.quantity } }
+      );
+
+      if (skuResult.modifiedCount === 0) {
+        throw {
+          status: 409,
+          message: `Stock update failed for "${item.variantSku}". Please try again.`,
+        };
+      }
     }
 
     // ── Audit Log ─────────────────────────────────────────────────────────
@@ -85,16 +103,13 @@ exports.checkout = async (userId, items) => {
   const order = await Order.create({
     user: userId,
     items: orderItems,
-    totalAmount: Math.round(totalAmount * 100) / 100, // avoid floating-point drift
+    totalAmount: Math.round(totalAmount * 100) / 100,
     status: "placed",
   });
 
   return order.toObject();
 };
 
-// ---------------------------------------------------------------------------
-// List orders for a specific user (customer)
-// ---------------------------------------------------------------------------
 exports.listMy = async (userId, query) => {
   const { page = 1, limit = 10 } = query;
   const pageNum = Math.max(Number(page), 1);
@@ -124,9 +139,6 @@ exports.listMy = async (userId, query) => {
   };
 };
 
-// ---------------------------------------------------------------------------
-// List all orders (admin) — filter by date range & status
-// ---------------------------------------------------------------------------
 exports.listAll = async (query) => {
   const { page = 1, limit = 20, status, startDate, endDate } = query;
   const pageNum = Math.max(Number(page), 1);
@@ -134,7 +146,6 @@ exports.listAll = async (query) => {
   const skip = (pageNum - 1) * limitNum;
 
   const filter = {};
-
   if (status) filter.status = status;
 
   if (startDate || endDate) {
@@ -165,14 +176,10 @@ exports.listAll = async (query) => {
   };
 };
 
-// ---------------------------------------------------------------------------
-// Update order status (state-machine validation)
-// ---------------------------------------------------------------------------
 const VALID_TRANSITIONS = {
   placed: ["paid", "cancelled"],
   paid: ["processing", "cancelled"],
   processing: ["completed", "cancelled"],
-  // completed & cancelled are terminal states
 };
 
 exports.updateStatus = async (orderId, newStatus, actorUserId) => {
@@ -183,9 +190,7 @@ exports.updateStatus = async (orderId, newStatus, actorUserId) => {
   if (!allowed || !allowed.includes(newStatus)) {
     throw {
       status: 400,
-      message: `Cannot transition from "${order.status}" to "${newStatus}". Allowed: ${
-        allowed ? allowed.join(", ") : "none (terminal state)"
-      }`,
+      message: `Invalid transition to ${newStatus}`,
     };
   }
 
@@ -198,7 +203,6 @@ exports.updateStatus = async (orderId, newStatus, actorUserId) => {
     .populate("items.productId", "name images")
     .lean();
 
-  // ── Audit Log ─────────────────────────────────────────────────────────
   await auditService.logAction({
     actorUserId,
     action: "ORDER_STATUS_CHANGED",
