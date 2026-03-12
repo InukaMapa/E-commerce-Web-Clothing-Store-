@@ -10,7 +10,7 @@ export default function QuantityPicker({ value, min = 1, max, onChange }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
         </svg>
       </button>
-      <span className="w-10 text-center text-sm font-bold">{value}</span>
+      <span className="w-10 text-center text-xs font-bold">{value}</span>
       <button
         onClick={() => onChange(max != null ? Math.min(max, value + 1) : value + 1)}
         disabled={max != null && value >= max}

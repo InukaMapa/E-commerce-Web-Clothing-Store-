@@ -17,10 +17,11 @@ import NotFound from "./pages/NotFound";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import AdminOverview from "./pages/admin/Overview";
 import UserManagement from "./pages/admin/Users";
-
-// Producer Dashboard Pages
-import ProducerOverview from "./pages/producer/Overview";
-import MyProducts from "./pages/producer/Products";
+import AdminProductManagement from "./pages/admin/ProductManagement";
+import AdminOrderManagement from "./pages/admin/Orders";
+import AdminInventory from "./pages/admin/Inventory";
+import AdminAnalytics from "./pages/admin/Analytics";
+import AdminCategories from "./pages/admin/Categories";
 
 function AppContent() {
   const { user } = useAuth();
@@ -42,7 +43,7 @@ function AppContent() {
               <Route
                 path="/checkout"
                 element={
-                  <ProtectedRoute roles={["customer", "producer", "admin"]}>
+                  <ProtectedRoute roles={["customer", "admin"]}>
                     <Checkout />
                   </ProtectedRoute>
                 }
@@ -57,7 +58,7 @@ function AppContent() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute roles={["producer", "admin"]}>
+          <ProtectedRoute roles={["admin"]}>
             <DashboardRedirect />
           </ProtectedRoute>
         }
@@ -72,30 +73,11 @@ function AppContent() {
               <Routes>
                 <Route path="dashboard" element={<AdminOverview />} />
                 <Route path="users" element={<UserManagement />} />
-                <Route path="products" element={<div>All Products (WIP)</div>} />
-                <Route path="producers" element={<div>Producers (WIP)</div>} />
-                <Route path="orders" element={<div>All Orders (WIP)</div>} />
-                <Route path="categories" element={<div>Categories (WIP)</div>} />
-                <Route path="analytics" element={<AdminOverview />} />
-                <Route path="settings" element={<div>Settings (WIP)</div>} />
-                <Route path="*" element={<Navigate to="dashboard" replace />} />
-              </Routes>
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Producer Dashboard Routes */}
-      <Route
-        path="/producer/*"
-        element={
-          <ProtectedRoute roles={["producer"]}>
-            <DashboardLayout>
-              <Routes>
-                <Route path="dashboard" element={<ProducerOverview />} />
-                <Route path="products" element={<MyProducts />} />
-                <Route path="orders" element={<div>My Orders (WIP)</div>} />
-                <Route path="analytics" element={<ProducerOverview />} />
+                <Route path="products" element={<AdminProductManagement />} />
+                <Route path="orders" element={<AdminOrderManagement />} />
+                <Route path="inventory" element={<AdminInventory />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="settings" element={<div>Settings (WIP)</div>} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
               </Routes>

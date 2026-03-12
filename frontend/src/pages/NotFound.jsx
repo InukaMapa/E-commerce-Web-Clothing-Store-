@@ -8,7 +8,7 @@ export default function NotFound() {
       <p className="mt-2 text-gray-500">Sorry, we couldn't find the page you're looking for.</p>
       <Link
         to="/"
-        className="mt-8 rounded-full bg-black px-8 py-3 text-sm font-bold text-white hover:bg-black transition-colors"
+        className="mt-8 rounded-full bg-black px-8 py-3 text-xs font-bold text-white hover:bg-black transition-colors"
       >
         Back to Shop
       </Link>

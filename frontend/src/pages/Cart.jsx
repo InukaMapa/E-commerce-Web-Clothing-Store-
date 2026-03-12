@@ -32,7 +32,7 @@ export default function Cart() {
         <p className="mt-2 text-gray-500 max-w-xs text-center">Items you add to your bag will appear here. Ready to find something new?</p>
         <Link
           to="/"
-          className="mt-8 rounded-full bg-black  px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-black hover:scale-105 active:scale-95 shadow-indigo-100"
+          className="mt-8 rounded-full bg-black  px-8 py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-black hover:scale-105 active:scale-95 shadow-indigo-100"
         >
           View Collection
         </Link>
@@ -65,19 +65,19 @@ export default function Cart() {
                     <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
                       <div>
                         <div className="flex justify-between">
-                          <h3 className="text-sm font-bold text-gray-900 hover:text-indigo-600 cursor-pointer transition-colors"
+                          <h3 className="text-xs font-bold text-gray-900 hover:text-indigo-600 cursor-pointer transition-colors"
                             onClick={() => navigate(`/products/${item.productId}`)}>
                             {item.name}
                           </h3>
                         </div>
                         <div className="mt-1 flex text-xs font-medium text-gray-500 uppercase tracking-wider">
                           <p className="border-r border-gray-200 pr-3">{item.variantSku}</p>
-                          <p className="pl-3">Unit: ${item.price?.toFixed(2)}</p>
+                          <p className="pl-3">Unit: Rs. {item.price?.toFixed(2)}</p>
                         </div>
                       </div>
 
                       <div className="mt-4 flex items-center justify-between sm:mt-0 sm:block sm:text-right">
-                        <p className="text-sm font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-xs font-bold text-gray-900">Rs. {(item.price * item.quantity).toFixed(2)}</p>
 
                         {/* Quantity Controls */}
                         <div className="mt-1.5 flex items-center rounded-lg border border-gray-200 w-fit sm:ml-auto">
@@ -115,21 +115,21 @@ export default function Cart() {
 
           {/* Order Summary Summary Panel */}
           <section className="mt-16 rounded-3xl bg-gray-50 p-8 lg:col-span-4 lg:mt-0 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-4">Order Summary</h2>
+            <h2 className="text-base font-bold text-gray-900 border-b border-gray-100 pb-4">Order Summary</h2>
 
             <dl className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
-                <dt className="text-sm text-gray-600">Subtotal</dt>
-                <dd className="text-sm font-bold text-gray-900">${total.toFixed(2)}</dd>
+                <dt className="text-xs text-gray-600">Subtotal</dt>
+                <dd className="text-xs font-bold text-gray-900">Rs. {total.toFixed(2)}</dd>
               </div>
               <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                <dt className="text-sm text-gray-600">Shipping Estimate</dt>
-                <dd className="text-sm font-bold text-gray-900">{total > 100 ? "FREE" : "$15.00"}</dd>
+                <dt className="text-xs text-gray-600">Shipping Estimate</dt>
+                <dd className="text-xs font-bold text-gray-900">{total > 100 ? "FREE" : "Rs. 15.00"}</dd>
               </div>
               <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                <dt className="text-base font-bold text-gray-900">Order Total</dt>
-                <dd className="text-base font-bold text-gray-900">
-                  ${(total > 100 ? total : total + 15).toFixed(2)}
+                <dt className="text-sm font-bold text-gray-900">Order Total</dt>
+                <dd className="text-sm font-bold text-gray-900">
+                  Rs. {(total > 100 ? total : total + 15).toFixed(2)}
                 </dd>
               </div>
             </dl>
@@ -137,7 +137,7 @@ export default function Cart() {
             <div className="mt-10">
               <button
                 onClick={handleCheckout}
-                className="w-full rounded-2xl bg-black px-4 py-4 text-sm font-bold text-white shadow-lg transition-all hover:bg-black hover:scale-[1.02] active:scale-[0.98] shadow-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="w-full rounded-2xl bg-black px-4 py-4 text-xs font-bold text-white shadow-lg transition-all hover:bg-black hover:scale-[1.02] active:scale-[0.98] shadow-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Proceed to Checkout
               </button>

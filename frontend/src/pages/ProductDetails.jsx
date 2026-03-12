@@ -122,7 +122,7 @@ export default function ProductDetails() {
                   <button
                     key={idx}
                     onClick={() => setActiveImage(idx)}
-                    className={`relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none ring-2 ring-offset-2 ${activeImage === idx ? 'ring-black' : 'ring-transparent'}`}
+                    className={`relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-xs font-medium uppercase hover:bg-gray-50 focus:outline-none ring-2 ring-offset-2 ${activeImage === idx ? 'ring-black' : 'ring-transparent'}`}
                   >
                     <img src={img} alt="" className="h-full w-full object-cover object-center rounded-md" />
                   </button>
@@ -145,12 +145,12 @@ export default function ProductDetails() {
 
             <div className="mt-3">
               <h2 className="sr-only">Product information</h2>
-              <p className="text-3xl text-gray-900 font-bold">${product.price?.toFixed(2)}</p>
+              <p className="text-3xl text-gray-900 font-bold">Rs. {product.price?.toFixed(2)}</p>
             </div>
 
             <div className="mt-6">
               <h3 className="sr-only">Description</h3>
-              <div className="space-y-6 text-base text-gray-700 leading-relaxed min-h-[100px]">
+              <div className="space-y-6 text-sm text-gray-700 leading-relaxed min-h-[100px]">
                 {product.description}
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function ProductDetails() {
               {/* Variant Selectors */}
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">Options</h3>
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Options</h3>
                   <div className="mt-4 flex flex-wrap gap-3">
                     {product.variants?.map((v) => (
                       <button
@@ -184,12 +184,12 @@ export default function ProductDetails() {
 
                 {/* Quantity Selector */}
                 <div className="flex items-center space-x-4">
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">Quantity</h3>
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Quantity</h3>
                   <div className="flex items-center rounded-lg border border-gray-200">
                     <button onClick={() => adjustQty(-1)} className="p-2 hover:text-black transition-colors">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
                     </button>
-                    <span className="w-12 text-center text-sm font-bold">{quantity}</span>
+                    <span className="w-12 text-center text-xs font-bold">{quantity}</span>
                     <button onClick={() => adjustQty(1)} className="p-2 hover:text-black   transition-colors">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                     </button>
@@ -205,24 +205,24 @@ export default function ProductDetails() {
                 <button
                   onClick={handleAddToCart}
                   disabled={!selectedVariant || selectedVariant.stock === 0 || adding}
-                  className={`flex w-full items-center justify-center rounded-xl bg-black px-8 py-4 text-sm font-bold text-white transition-all hover:bg-black hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${(!selectedVariant || selectedVariant.stock === 0 || adding) ? 'opacity-50 cursor-not-allowed' : 'shadow-lg'
+                  className={`flex w-full items-center justify-center rounded-xl bg-black px-8 py-4 text-xs font-bold text-white transition-all hover:bg-black hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${(!selectedVariant || selectedVariant.stock === 0 || adding) ? 'opacity-50 cursor-not-allowed' : 'shadow-lg'
                     }`}
                 >
                   {adding ? 'Processing...' : (selectedVariant?.stock === 0 ? 'Out of Stock' : 'Add to Bag')}
                 </button>
 
                 {successMsg && (
-                  <p className="text-center text-sm font-bold text-green-600 animate-bounce">{successMsg}</p>
+                  <p className="text-center text-xs font-bold text-green-600 animate-bounce">{successMsg}</p>
                 )}
               </div>
             </div>
 
             {/* Product Meta */}
             <div className="mt-12 border-t border-gray-100 pt-8">
-              <ul className="space-y-2 text-sm text-gray-500">
+              <ul className="space-y-2 text-xs text-gray-500">
                 <li className="flex items-center">
                   <svg className="h-5 w-5 mr-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  <span>Free shipping on orders over $100</span>
+                  <span>Free shipping on orders over Rs. 100</span>
                 </li>
                 <li className="flex items-center">
                   <svg className="h-5 w-5 mr-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>

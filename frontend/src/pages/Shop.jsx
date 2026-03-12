@@ -92,7 +92,7 @@ export default function Shop() {
       <div className="flex min-h-screen items-center justify-center pt-20">
         <div className="flex flex-col items-center">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-          <p className="mt-4 text-sm text-gray-500">Curating our collection...</p>
+          <p className="mt-4 text-xs text-gray-500">Curating our collection...</p>
         </div>
       </div>
     );
@@ -154,7 +154,7 @@ export default function Shop() {
             Recommended For You
           </h2>
 
-          <p className="text-gray-500 text-sm mt-2">
+          <p className="text-gray-500 text-xs mt-2">
             Based on your shopping activity
           </p>
 

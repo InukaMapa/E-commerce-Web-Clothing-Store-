@@ -98,7 +98,7 @@ export default function Login() {
         <h2 className="mt-1 text-center text-3xl font-extrabold tracking-tight text-gray-900">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-xs text-gray-600">
           Welcome back to Slaughter
         </p>
       </div>
@@ -116,7 +116,7 @@ export default function Login() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">{serverError}</h3>
+                    <h3 className="text-xs font-medium text-red-800">{serverError}</h3>
                   </div>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export default function Login() {
 
             {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+              <label htmlFor="email" className="block text-xs font-semibold text-gray-700">
                 Email address
               </label>
               <div className="mt-1">
@@ -137,7 +137,7 @@ export default function Login() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className={`block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ${errors.email ? "ring-red-500" : "ring-gray-300"
-                    } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm px-3 transition-all outline-none`}
+                    } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-xs px-3 transition-all outline-none`}
                   placeholder="name@example.com"
                 />
                 {errors.email && (
@@ -149,10 +149,10 @@ export default function Login() {
             {/* Password Input */}
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="password" className="block text-xs font-semibold text-gray-700">
                   Password
                 </label>
-                <div className="text-sm">
+                <div className="text-xs">
                   <a href="#" className="font-semibold text-black hover:text-black">
                     Forgot?
                   </a>
@@ -168,7 +168,7 @@ export default function Login() {
                   value={formData.password}
                   onChange={handleInputChange}
                   className={`block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ${errors.password ? "ring-red-500" : "ring-gray-300"
-                    } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm px-3 transition-all outline-none`}
+                    } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-xs px-3 transition-all outline-none`}
                   placeholder="••••••••"
                 />
                 {errors.password && (
@@ -182,7 +182,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex w-full justify-center rounded-md bg-black px-3 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:scale-[1.01] active:scale-[0.99]"
+                className={`flex w-full justify-center rounded-md bg-black px-3 py-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:scale-[1.01] active:scale-[0.99]"
                   }`}
               >
                 {isSubmitting ? (
@@ -201,7 +201,7 @@ export default function Login() {
           </form>
         </div>
 
-        <p className="mt-8 text-center text-sm text-gray-500">
+        <p className="mt-8 text-center text-xs text-gray-500">
           Don't have an account?{" "}
           <Link to="/register" className="font-semibold text-black   hover:text-black">
             Create one today

@@ -80,7 +80,7 @@ export default function Checkout() {
         <p className="mt-2 text-gray-500 font-medium">Thank you for choosing Slaughter.</p>
         <div className="mt-8 rounded-lg bg-white p-6 shadow-sm border border-gray-100">
           <p className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-1">Order ID</p>
-          <p className="text-sm font-mono font-bold text-gray-900">{orderId}</p>
+          <p className="text-xs font-mono font-bold text-gray-900">{orderId}</p>
         </div>
         <p className="mt-10 text-xs text-gray-400 font-medium">Redirecting you to the shop in a moment...</p>
       </div>
@@ -104,7 +104,7 @@ export default function Checkout() {
       <div className="mx-auto max-w-2xl">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Finalize Order</h1>
-          <p className="mt-2 text-sm text-gray-500">Confirm your items and proceed to fulfillment.</p>
+          <p className="mt-2 text-xs text-gray-500">Confirm your items and proceed to fulfillment.</p>
         </div>
 
         {error && (
@@ -113,7 +113,7 @@ export default function Checkout() {
               <svg className="h-5 w-5 text-red-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <p className="text-sm font-semibold text-red-800">{error}</p>
+              <p className="text-xs font-semibold text-red-800">{error}</p>
             </div>
           </div>
         )}
@@ -121,35 +121,35 @@ export default function Checkout() {
         <div className="bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-100">
           {/* Order Summary Table */}
           <div className="p-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-6">Review Bag</h2>
+            <h2 className="text-base font-bold text-gray-900 mb-6">Review Bag</h2>
             <ul className="divide-y divide-gray-100">
               {items.map((item) => (
                 <li key={`${item.productId}-${item.variantSku}`} className="flex py-6 justify-between items-center">
                   <div className="flex items-center">
                     <img src={item.image} alt={item.name} className="h-14 w-14 rounded-lg object-cover border border-gray-200" />
                     <div className="ml-4">
-                      <p className="text-sm font-bold text-gray-900">{item.name}</p>
+                      <p className="text-xs font-bold text-gray-900">{item.name}</p>
                       <p className="text-xs text-gray-500">{item.variantSku} x {item.quantity}</p>
                     </div>
                   </div>
-                  <p className="text-sm font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="text-xs font-bold text-gray-900">Rs. {(item.price * item.quantity).toFixed(2)}</p>
                 </li>
               ))}
             </ul>
 
             <div className="mt-8 border-t border-gray-100 pt-8 space-y-4">
-              <div className="flex justify-between text-sm text-gray-600">
+              <div className="flex justify-between text-xs text-gray-600">
                 <p>Bag Subtotal</p>
-                <p className="font-bold">${total.toFixed(2)}</p>
+                <p className="font-bold">Rs. {total.toFixed(2)}</p>
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
+              <div className="flex justify-between text-xs text-gray-600">
                 <p>Shipping</p>
-                <p className="font-bold text-green-600">{total > 100 ? 'FREE' : '$15.00'}</p>
+                <p className="font-bold text-green-600">{total > 100 ? 'FREE' : 'Rs. 15.00'}</p>
               </div>
               <div className="flex justify-between items-center border-t border-gray-200 pt-6">
                 <p className="text-xl font-black text-gray-900 leading-none">Total Due</p>
                 <p className="text-2xl font-black text-black">
-                  ${(total > 100 ? total : total + 15).toFixed(2)}
+                  Rs. {(total > 100 ? total : total + 15).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function Checkout() {
             <button
               onClick={handleSubmitOrder}
               disabled={loading}
-              className={`flex w-full items-center justify-center rounded-2xl bg-black px-8 py-4 text-sm font-bold text-white transition-all hover:bg-black hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${loading ? "opacity-70 cursor-not-allowed" : "shadow-lg shadow-black"
+              className={`flex w-full items-center justify-center rounded-2xl bg-black px-8 py-4 text-xs font-bold text-white transition-all hover:bg-black hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${loading ? "opacity-70 cursor-not-allowed" : "shadow-lg shadow-black"
                 }`}
             >
               {loading ? (

@@ -25,10 +25,10 @@ export default function Navbar() {
           </Link>
           {/* Nav links and Icons */}
           <div className="flex items-center space-x-8">
-            <Link to="/" className="text-sm font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Home</Link>
+            <Link to="/" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Home</Link>
 
             {user && ["producer", "admin"].includes(user.role) && (
-              <Link to="/dashboard" className="text-sm font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Dashboard</Link>
+              <Link to="/dashboard" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Dashboard</Link>
             )}
 
             <div className="flex items-center space-x-5">

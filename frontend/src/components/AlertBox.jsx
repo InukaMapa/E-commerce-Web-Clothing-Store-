@@ -7,7 +7,7 @@ export default function AlertBox({ type = "error", message }) {
   };
   if (!message) return null;
   return (
-    <div className={`rounded-xl border p-4 text-sm font-medium ${styles[type] || styles.error}`}>
+    <div className={`rounded-xl border p-4 text-xs font-medium ${styles[type] || styles.error}`}>
       {message}
     </div>
   );

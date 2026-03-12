@@ -78,9 +78,9 @@ export default function Dashboard() {
   }
 
   const kpiCards = [
-    { label: "Total Revenue", value: `$${data.kpis.totalRevenue?.toLocaleString()}`, icon: "💰" },
+    { label: "Total Revenue", value: `Rs. ${data.kpis.totalRevenue?.toLocaleString()}`, icon: "💰" },
     { label: "Total Orders", value: data.kpis.orderCount, icon: "📦" },
-    { label: "Avg. Order Value", value: `$${data.kpis.avgOrderValue?.toFixed(2)}`, icon: "📈" }
+    { label: "Avg. Order Value", value: `Rs. ${data.kpis.avgOrderValue?.toFixed(2)}`, icon: "📈" }
   ];
 
   return (
