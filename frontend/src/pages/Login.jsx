@@ -2,15 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-/**
- * PRODUCTION-READY LOGIN PAGE
- * Feature Set:
- * - Robust error handling & status tracking
- * - Inline form validation
- * - Dynamic loading states
- * - Auto-redirect if already authenticated
- * - Responsive, accessible premium design (Tailwind ready)
- */
+
 export default function Login() {
   const { login, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
