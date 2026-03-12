@@ -23,12 +23,7 @@ const DashboardLayout = ({ children }) => {
           </div>
 
           <div className="flex items-center space-x-8">
-            <button className="relative text-gray-500 hover:text-black transition-colors">
-              <Bell size={20} />
-              <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">
-                3
-              </span>
-            </button>
+
             <div className="flex items-center space-x-4 border-l border-gray-100 pl-8">
               <div className="text-right">
                 <p className="text-xs font-black uppercase tracking-widest text-black mb-0.5">

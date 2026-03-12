@@ -78,7 +78,7 @@ function AppContent() {
                 <Route path="inventory" element={<AdminInventory />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="settings" element={<div>Settings (WIP)</div>} />
+                <Route path="settings" element={<div>Slaughter Studio (WIP)</div>} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
               </Routes>
             </DashboardLayout>

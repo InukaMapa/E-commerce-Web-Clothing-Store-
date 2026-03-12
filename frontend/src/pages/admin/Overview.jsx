@@ -9,7 +9,6 @@ import {
   Area,
 } from "recharts";
 import {
-  DollarSign,
   Package,
   ShoppingCart,
   Users,
@@ -17,6 +16,7 @@ import {
   Calendar,
   AlertTriangle,
   Download,
+  Wallet,
 } from "lucide-react";
 import api from "../../api/axios";
 import StatCard from "../../components/dashboard/StatCard";
@@ -159,7 +159,7 @@ const AdminOverview = () => {
         <StatCard
           label="Revenue"
           value={`Rs. ${stats.totalRevenue.toLocaleString()}`}
-          icon={DollarSign}
+          icon={Wallet}
         />
       </div>
 

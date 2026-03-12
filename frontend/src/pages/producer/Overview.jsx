@@ -9,13 +9,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import {
-  DollarSign,
   Package,
   ShoppingCart,
   TrendingUp,
   AlertTriangle,
   Calendar,
   Zap,
+  Wallet,
 } from "lucide-react";
 import api from "../../api/axios";
 import StatCard from "../../components/dashboard/StatCard";
@@ -88,7 +88,7 @@ const ProducerOverview = () => {
         <StatCard
           label="Brand Revenue"
           value={`Rs. ${stats.totalRevenue.toLocaleString()}`}
-          icon={DollarSign}
+          icon={Wallet}
         />
       </div>
 

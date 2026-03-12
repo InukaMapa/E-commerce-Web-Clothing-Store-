@@ -176,10 +176,14 @@ exports.listAll = async (query) => {
   };
 };
 
+const ALL_STATUSES = ["placed", "paid", "processing", "shipped", "completed", "cancelled"];
 const VALID_TRANSITIONS = {
-  placed: ["paid", "cancelled"],
-  paid: ["processing", "cancelled"],
-  processing: ["completed", "cancelled"],
+  placed: ALL_STATUSES,
+  paid: ALL_STATUSES,
+  processing: ALL_STATUSES,
+  shipped: ALL_STATUSES,
+  completed: ALL_STATUSES,
+  cancelled: ALL_STATUSES,
 };
 
 exports.updateStatus = async (orderId, newStatus, actorUserId) => {
