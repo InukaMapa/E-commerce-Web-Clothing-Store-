@@ -9,6 +9,7 @@ import {
   Package,
   ChevronDown,
   ChevronUp,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import api from "../../api/axios";
 
@@ -23,17 +24,20 @@ const STATUS_COLORS = {
   placed:     "bg-blue-50 text-blue-600 border-blue-100",
   paid:       "bg-indigo-50 text-indigo-600 border-indigo-100",
   processing: "bg-orange-50 text-orange-600 border-orange-100",
+  shipped:    "bg-purple-50 text-purple-600 border-purple-100",
   completed:  "bg-green-50 text-green-600 border-green-100",
   cancelled:  "bg-red-50 text-red-600 border-red-100",
 };
 
 // State machine — valid transitions for manual override
+const ALL_STATUSES = ["placed", "paid", "processing", "shipped", "completed", "cancelled"];
 const NEXT_STATUSES = {
-  placed:     ["processing", "cancelled"],
-  paid:       ["processing", "cancelled"],
-  processing: ["completed", "cancelled"],
-  completed:  [],
-  cancelled:  [],
+  placed:     ["paid", "processing", "shipped", "completed", "cancelled"],
+  paid:       ["processing", "shipped", "completed", "cancelled"],
+  processing: ["completed", "shipped", "cancelled"],
+  shipped:    ["completed", "cancelled"],
+  completed:  ["processing", "shipped", "cancelled"],
+  cancelled:  ["placed", "paid", "processing", "shipped", "completed"],
 };
 
 const AdminOrderManagement = () => {
@@ -44,13 +48,21 @@ const AdminOrderManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [lastFetched, setLastFetched] = useState(null);
+  
+  // Date filter state
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const fetchOrders = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     setError(null);
     try {
-      const res = await api.get("/api/admin/orders");
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+      
+      const res = await api.get("/api/admin/orders", { params });
       const data = res.data?.data;
       setOrders(Array.isArray(data) ? data : []);
       setLastFetched(new Date());
@@ -61,7 +73,7 @@ const AdminOrderManagement = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [startDate, endDate]);
 
   useEffect(() => {
     fetchOrders();
@@ -120,7 +132,36 @@ const AdminOrderManagement = () => {
             {lastFetched && ` · Updated ${lastFetched.toLocaleTimeString()}`}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Date Picker */}
+          <div className="flex items-center space-x-2 bg-white border border-gray-200 px-3 py-1.5 shadow-sm">
+            <div className="flex items-center space-x-2 border-r border-gray-100 pr-3">
+              <CalendarIcon size={12} className="text-gray-400" />
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={(e) => setStartDate(e.target.value)}
+                className="text-[10px] font-bold uppercase tracking-widest outline-none bg-transparent"
+              />
+            </div>
+            <div className="flex items-center pl-1">
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={(e) => setEndDate(e.target.value)}
+                className="text-[10px] font-bold uppercase tracking-widest outline-none bg-transparent"
+              />
+            </div>
+            {(startDate || endDate) && (
+              <button 
+                onClick={() => { setStartDate(""); setEndDate(""); }}
+                className="ml-2 text-[9px] font-black uppercase text-red-500 hover:text-red-700"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
