@@ -86,6 +86,7 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-white">
+<<<<<<< Updated upstream
       {/* ─── Announcement Bar ─── */}
       <div className="bg-black text-[10px] uppercase tracking-[0.2em] text-white py-2 px-4 text-center border-t border-white/10">
         Don't miss out on our exclusive special offer — Enjoy a massive 50% off on your favorite items! Hurry, this limited-time deal won't last long!
@@ -102,6 +103,27 @@ export default function Shop() {
           <p className="font-sans text-[10px] uppercase tracking-[0.4em] mb-4 opacity-80">Step into style — Find your perfect pair</p>
           <h1 className="text-5xl md:text-7xl font-serif font-bold uppercase tracking-widest leading-none mb-8">
             Trendy, <br /> Stylish, <br /> Brand New!
+=======
+
+      {/* Announcement */}
+      <div className="bg-black text-white text-xs text-center py-2 uppercase tracking-widest">
+        Don’t miss out on our exclusive special offer — enjoy a massive 40% OFF on your favorite items! Hurry, this limited-time deal won’t last long!
+      </div>
+
+      {/* Hero Section */}
+      <header className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+
+        <img
+          src={hero}
+          alt="hero"
+          className="absolute inset-0 w-full h-full object-cover brightness-50 hero-zoom"
+        />
+
+        <div className="relative text-center text-white">
+          <p className="text-sm font-medium  uppercase tracking-widest">step into style-find your perfect pair</p>
+          <h1 className="text-6xl font-bold uppercase tracking-widest">
+            Trendy <br /> Stylish <br /> Brand New
+>>>>>>> Stashed changes
           </h1>
           <button className="bg-white text-black px-8 py-3 text-[14px] uppercase font-bold tracking-widest hover:bg-black hover:text-white transition-all duration-300">
             Shop Now
@@ -109,6 +131,7 @@ export default function Shop() {
         </div>
       </header>
 
+<<<<<<< Updated upstream
       {/* ─── Latest Arrivals Section ─── */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-12">
@@ -119,6 +142,109 @@ export default function Shop() {
           <button className="bg-black text-white px-6 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-800 transition-all">
             Shop All
           </button>
+=======
+
+      {/* Customization Banner */}
+      <section className="bg-zinc-100 py-20 px-4 text-center">
+        <div className="max-w-5xl mx-auto border border-black py-8">
+          <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-widest mb-6">
+            Customize Your Own T-Shirt
+          </h2>
+          <p className="text-gray-600 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+            Unleash your creativity and design a unique style that represents you. Our premium customization process ensures your vision comes to life with precision and quality.
+          </p>
+          <button
+            onClick={() => navigate("/customization-info")}
+            className="bg-black text-white px-10 py-4 uppercase tracking-widest text-sm font-bold hover:bg-zinc-800 transition-colors duration-300"
+          >
+            Start Customizing
+          </button>
+        </div>
+      </section>
+
+      {/* ⭐ Recommended Products */}
+      <section className="mx-auto max-w-7xl px-4 py-20">
+
+        <div className="mb-10">
+
+          <h2 className="text-3xl font-bold uppercase tracking-widest">
+            Recommended For You
+          </h2>
+
+          <p className="text-gray-500 text-xs mt-2">
+            Based on your shopping activity
+          </p>
+
+        </div>
+
+        {recommendedProducts.length === 0 ? (
+
+          <p className="text-gray-400">No recommendations yet</p>
+
+        ) : (
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            {recommendedProducts.map((product) => (
+
+              <ProductCard key={product._id} product={product} />
+
+            ))}
+
+          </div>
+
+        )}
+
+      </section>
+
+
+
+      {/* Categories */}
+      <section className="grid md:grid-cols-2 h-[600px]">
+
+        <div className="relative overflow-hidden group">
+
+          <img
+            src={men}
+            alt="men"
+            className="absolute inset-0 w-full h-full object-cover category-zoom"
+          />
+
+          <div className="absolute inset-0 flex items-center justify-center text-white text-4xl font-medium">
+            Shop Men
+          </div>
+
+        </div>
+
+        <div className="relative overflow-hidden group">
+
+          <img
+            src={women}
+            alt="women"
+            className="absolute inset-0 w-full h-full object-cover category-zoom"
+          />
+
+          <div className="absolute inset-0 flex items-center justify-center text-white text-4xl font-medium">
+            Shop Women
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      {/* Latest Arrivals */}
+
+      <section className="mx-auto max-w-7xl px-4 py-20">
+
+        <div className="mb-10">
+
+          <h2 className="text-3xl font-bold uppercase tracking-widest">
+            Latest Arrivals
+          </h2>
+
+>>>>>>> Stashed changes
         </div>
         <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
           {products.slice(0, 4).map((product) => (
@@ -127,6 +253,7 @@ export default function Shop() {
         </div>
       </section>
 
+<<<<<<< Updated upstream
       {/* ─── Gender Categories ─── */}
       <section className="grid grid-cols-1 md:grid-cols-2 h-[600px] w-full">
         <div className="relative group cursor-pointer overflow-hidden">
@@ -163,6 +290,12 @@ export default function Shop() {
           <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black mb-2">T-Shirts Collection</h2>
           <p className="text-xs text-gray-400 uppercase tracking-widest">Discover Our T-Shirts Collection</p>
         </div>
+=======
+
+
+      {/* Quote Section */}
+      <section className="relative h-[340px] flex items-center justify-center text-white">
+>>>>>>> Stashed changes
 
         <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
           <div className="flex items-center space-x-2">
@@ -195,14 +328,26 @@ export default function Shop() {
           alt="Quote background"
           className="absolute inset-0 w-full h-full object-cover brightness-[0.3]"
         />
+<<<<<<< Updated upstream
         <div className="relative z-10 max-w-4xl text-center px-4">
           <h2 className="text-2xl md:text-3xl font-sans font-bold uppercase tracking-[0.2em] leading-relaxed mb-6 italic">
             "Style is a way to say who you are without having to speak."
           </h2>
           <p className="text-xs uppercase tracking-[0.4em] opacity-80">— Rachel Zoe</p>
+=======
+
+        <div className="relative text-center max-w-3xl">
+
+          <h2 className="text-3xl font-semibold italic">
+            "Style is a way to say who you are without having to speak."
+          </h2>
+          <h4 className="text-m font-semibold italic  mt-2">– Rachel Zoe</h4>
+
+>>>>>>> Stashed changes
         </div>
       </section>
 
+<<<<<<< Updated upstream
       {/* ─── Footer / Newsletter ─── */}
       <footer className="bg-black text-white pt-24 pb-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -233,6 +378,10 @@ export default function Shop() {
                 </ul>
               </div>
             </div>
+=======
+      {/* Footer */}
+      <footer className="bg-black text-white py-8 text-center">
+>>>>>>> Stashed changes
 
             <div>
               <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-4">Sign up for the FOA newsletter</h3>
