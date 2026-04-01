@@ -1,0 +1,100 @@
+[
+  {
+    "name": "Artic Puffer Jacket",
+    "status": "approved",
+    "variants": [
+      {
+        "size": "S",
+        "color": "Default",
+        "sku": "",
+        "stock": 5,
+        "lowStockThreshold": 5,
+        "_id": "69b299113a98e682a9df7fb5"
+      }
+    ]
+  },
+  {
+    "name": "Arctic Puffer Jacket",
+    "status": "approved",
+    "variants": [
+      {
+        "size": "M",
+        "color": "Default",
+        "sku": "",
+        "stock": 5,
+        "lowStockThreshold": 5,
+        "_id": "69b2a6c03a98e682a9df80f8"
+      }
+    ]
+  },
+  {
+    "name": "Arctic Puffer Jacket",
+    "status": "approved",
+    "variants": [
+      {
+        "size": "L",
+        "color": "Default",
+        "sku": "",
+        "stock": 5,
+        "lowStockThreshold": 5,
+        "_id": "69b2a6ef3a98e682a9df8107"
+      }
+    ]
+  },
+  {
+    "name": "Arctic Puffer Jacket ",
+    "status": "approved",
+    "variants": [
+      {
+        "size": "XL",
+        "color": "Default",
+        "sku": "",
+        "stock": 10,
+        "lowStockThreshold": 5,
+        "_id": "69b2a7413a98e682a9df8118"
+      }
+    ]
+  },
+  {
+    "name": "Nomad Cargo Pant",
+    "status": "approved",
+    "variants": [
+      {
+        "size": "30",
+        "color": "Default",
+        "sku": "",
+        "stock": 5,
+        "lowStockThreshold": 5,
+        "_id": "69b2a7d83a98e682a9df812b"
+      }
+    ]
+  },
+  {
+    "name": "Nomad Cargo Pant",
+    "status": "approved",
+    "variants": [
+      {
+        "size": "32",
+        "color": "Default",
+        "sku": "",
+        "stock": 5,
+        "lowStockThreshold": 5,
+        "_id": "69b2a81a3a98e682a9df8140"
+      }
+    ]
+  },
+  {
+    "name": "Nomad Cargo Pant",
+    "status": "approved",
+    "variants": [
+      {
+        "size": "34",
+        "color": "Default",
+        "sku": "",
+        "stock": 10,
+        "lowStockThreshold": 5,
+        "_id": "69b2a8e23a98e682a9df8157"
+      }
+    ]
+  }
+]

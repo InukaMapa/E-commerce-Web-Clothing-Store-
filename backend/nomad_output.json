@@ -1,0 +1,44 @@
+[
+  {
+    "status": "pending",
+    "tags": [],
+    "_id": "69a7b7e765abccfd2b07eb87",
+    "name": "Nomad Cargo Pants",
+    "description": "Technically advanced cargo pants with water-resistant finish and ergonomic pockets. Perfect for urban exploration.",
+    "price": 120,
+    "images": [
+      "https://images.unsplash.com/photo-1594931934402-621438517e27?q=80&w=800&auto=format&fit=crop"
+    ],
+    "variants": [
+      {
+        "size": "30",
+        "color": "Olive",
+        "sku": "PANT-OLV-30",
+        "stock": 10,
+        "lowStockThreshold": 5,
+        "_id": "69a7b7e765abccfd2b07eb88"
+      },
+      {
+        "size": "32",
+        "color": "Olive",
+        "sku": "PANT-OLV-32",
+        "stock": 12,
+        "lowStockThreshold": 5,
+        "_id": "69a7b7e765abccfd2b07eb89"
+      },
+      {
+        "size": "34",
+        "color": "Olive",
+        "sku": "PANT-OLV-34",
+        "stock": 8,
+        "lowStockThreshold": 5,
+        "_id": "69a7b7e765abccfd2b07eb8a"
+      }
+    ],
+    "createdBy": "69a7b7e665abccfd2b07eb80",
+    "__v": 0,
+    "createdAt": "2026-03-04T04:41:11.054Z",
+    "updatedAt": "2026-03-04T04:41:11.054Z",
+    "productId": "P2"
+  }
+]

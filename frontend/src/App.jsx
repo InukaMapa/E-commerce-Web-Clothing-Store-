@@ -1,35 +1,106 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { CartProvider } from "./cart/CartContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import Navbar from "./components/Navbar";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Shop from "./pages/Shop";
+import ProductDetails from "./pages/ProductDetails";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import DashboardRedirect from "./pages/DashboardRedirect";
+import CustomizationInfo from "./pages/CustomizationInfo";
+import CustomizeCanvas from "./pages/CustomizeCanvas";
+import NotFound from "./pages/NotFound";
+
+// Admin Dashboard Pages
+import DashboardLayout from "./components/dashboard/DashboardLayout";
+import AdminOverview from "./pages/admin/Overview";
+import UserManagement from "./pages/admin/Users";
+import AdminProductManagement from "./pages/admin/ProductManagement";
+import AdminOrderManagement from "./pages/admin/Orders";
+import AdminInventory from "./pages/admin/Inventory";
+import AdminAnalytics from "./pages/admin/Analytics";
+import AdminCategories from "./pages/admin/Categories";
+
+function AppContent() {
+  const { user } = useAuth();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+      {/* Customer Routes with Main Navbar */}
+      <Route
+        path="/*"
+        element={
+          <>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Shop />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/products/:id" element={<ProductDetails />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute roles={["customer", "admin"]}>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/customization-info" element={<CustomizationInfo />} />
+              <Route path="/customize-canvas" element={<CustomizeCanvas />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </>
+        }
+      />
+
+      {/* Unified Dashboard Entry Point */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <DashboardRedirect />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Dashboard Routes */}
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <DashboardLayout>
+              <Routes>
+                <Route path="dashboard" element={<AdminOverview />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="products" element={<AdminProductManagement />} />
+                <Route path="orders" element={<AdminOrderManagement />} />
+                <Route path="inventory" element={<AdminInventory />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="settings" element={<div>Slaughter Studio (WIP)</div>} />
+                <Route path="*" element={<Navigate to="dashboard" replace />} />
+              </Routes>
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
