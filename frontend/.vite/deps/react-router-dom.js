@@ -2,7 +2,7 @@ import {
   __commonJS,
   __toESM,
   require_react
-} from "./chunk-G4V7ITBN.js";
+} from "./chunk-6MYGRZGN.js";
 
 // node_modules/cookie/dist/index.js
 var require_dist = __commonJS({

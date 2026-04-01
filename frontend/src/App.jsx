@@ -11,6 +11,8 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import DashboardRedirect from "./pages/DashboardRedirect";
+import CustomizationInfo from "./pages/CustomizationInfo";
+import CustomizeCanvas from "./pages/CustomizeCanvas";
 import NotFound from "./pages/NotFound";
 
 // Admin Dashboard Pages
@@ -48,6 +50,8 @@ function AppContent() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/customization-info" element={<CustomizationInfo />} />
+              <Route path="/customize-canvas" element={<CustomizeCanvas />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </>

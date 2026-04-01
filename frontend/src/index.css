@@ -65,3 +65,29 @@ img {
 .font-sans {
   font-family: "Manrope", sans-serif;
 }
+
+/* Hero Zoom Animation */
+@keyframes hero-zoom {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.hero-zoom {
+  animation: hero-zoom 20s infinite ease-in-out;
+}
+
+.category-zoom {
+  transition: transform 0.5s ease;
+}
+
+.group:hover .category-zoom {
+  transform: scale(1.1);
+}
+
