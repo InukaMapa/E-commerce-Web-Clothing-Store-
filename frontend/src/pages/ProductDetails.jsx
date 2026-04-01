@@ -12,6 +12,13 @@ import { useCart } from "../cart/CartContext";
  * - Multi-image gallery support
  * - Add-to-Cart integration with validation
  */
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+function resolveImage(img) {
+  if (!img) return null;
+  return img.startsWith("/uploads") ? `${BASE_URL}${img}` : img;
+}
+
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,17 +40,12 @@ export default function ProductDetails() {
       try {
         setLoading(true);
         setError(null);
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
         const res = await api.get(`/api/products/${id}`);
         const data = res.data?.data?.product;
 
         if (!data) throw new Error("Product data is missing");
 
-<<<<<<< Updated upstream
-=======
         // Merge logic
         try {
           const othersRes = await api.get(`/api/products?search=${encodeURIComponent(data.name)}`);
@@ -71,7 +73,6 @@ export default function ProductDetails() {
           console.error("Merging failed:", othersErr);
         }
 
->>>>>>> Stashed changes
         setProduct(data);
         // Pre-select first variant if available and in stock
         if (data.variants?.length > 0) {
@@ -147,77 +148,39 @@ export default function ProductDetails() {
     <div className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12">
-<<<<<<< Updated upstream
-
-          {/* Image Gallery */}
-          <div className="flex flex-col-reverse">
-            <div className="mx-auto mt-6 hidden w-full max-w-2xl sm:block lg:max-w-none">
-              <div className="grid grid-cols-4 gap-4">
-=======
           {/* Image Gallery */}
           <div className="flex flex-col-reverse lg:flex-row gap-6">
             {/* Thumbnails - Vertical Column on Desktop */}
             <div className="w-full lg:w-24 shrink-0">
               <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto max-h-[500px] no-scrollbar">
->>>>>>> Stashed changes
                 {product.images?.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImage(idx)}
-<<<<<<< Updated upstream
-                    className={`relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none ring-2 ring-offset-2 ${activeImage === idx ? 'ring-black' : 'ring-transparent'}`}
-                  >
-                    <img src={img} alt="" className="h-full w-full object-cover object-center rounded-md" />
-=======
                     className={`relative flex-shrink-0 w-20 h-20 lg:w-24 lg:h-24 cursor-pointer items-center justify-center rounded-lg bg-zinc-50 border-2 transition-all ${activeImage === idx ? 'border-black' : 'border-transparent hover:border-zinc-200'}`}
                   >
                     <img src={resolveImage(img)} alt="" className="h-full w-full object-cover object-center rounded-lg" />
->>>>>>> Stashed changes
                   </button>
                 ))}
               </div>
             </div>
 
-<<<<<<< Updated upstream
-            <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-              <img
-                src={product.images?.[activeImage] || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1000&auto=format&fit=crop"}
-                className="h-full w-full object-cover object-center"
-=======
             {/* Main Image */}
             <div className="flex-1 aspect-[4/5] overflow-hidden rounded-2xl border border-zinc-100 bg-zinc-50">
               <img
                 src={resolveImage(product.images?.[activeImage]) || ""}
                 className="h-full w-full object-cover object-center transition-transform duration-500 hover:scale-105"
->>>>>>> Stashed changes
                 alt={product.name}
               />
             </div>
           </div>
 
-<<<<<<< Updated upstream
           {/* Product Info */}
-          <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">{product.name}</h1>
-
-            <div className="mt-3">
-              <h2 className="sr-only">Product information</h2>
-              <p className="text-3xl text-gray-900 font-bold">${product.price?.toFixed(2)}</p>
-            </div>
-
-            <div className="mt-6">
-              <h3 className="sr-only">Description</h3>
-              <div className="space-y-6 text-base text-gray-700 leading-relaxed min-h-[100px]">
-                {product.description}
-              </div>
-            </div>
-=======
           <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
             <h1 className="text-4xl font-bold tracking-tight text-black font-serif uppercase tracking-widest">{product.name}</h1>
 
             <div className="mt-3"><div className="space-y-6 text-sm text-gray-700 leading-relaxed min-h-[100px]">{product.description}</div></div>
             <div className="mt-1"><p className="text-3xl text-gray-900 font-bold">Rs. {product.price?.toFixed(2)}</p></div>
->>>>>>> Stashed changes
 
             <div className="mt-10">
               {/* Variant Selectors */}

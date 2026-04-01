@@ -20,9 +20,6 @@ export default function Login() {
   useEffect(() => {
     if (user && !authLoading) {
       const from = location.state?.from?.pathname || "/";
-<<<<<<< Updated upstream
-      navigate(from, { replace: true });
-=======
 
       // If logging in from the home or login page without a specific "from" target
       if (from === "/") {
@@ -37,7 +34,6 @@ export default function Login() {
         // Redirect back to where they were trying to go
         navigate(from, { replace: true });
       }
->>>>>>> Stashed changes
     }
   }, [user, authLoading, navigate, location]);
 
@@ -109,21 +105,11 @@ export default function Login() {
   }
 
   return (
-<<<<<<< Updated upstream
-    <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-6 py-4lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-
-        <h2 className="mt-1 text-center text-3xl font-extrabold tracking-tight text-gray-900">
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-=======
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-6 py-2 lg:px-8">
 
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
 
         <p className="text-center text-2xl font-bold text-gray-600 mb-4">
->>>>>>> Stashed changes
           Welcome back to Slaughter
         </p>
       </div>
@@ -148,15 +134,7 @@ export default function Login() {
 
             {/* Email Input */}
             <div>
-<<<<<<< Updated upstream
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
-                Email address
-              </label>
-=======
-
-
               <label htmlFor="email" className="block text-xs font-semibold text-gray-700">Email address</label>
->>>>>>> Stashed changes
               <div className="mt-1">
                 <input
                   id="email"
@@ -170,32 +148,15 @@ export default function Login() {
                     } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm px-3 transition-all outline-none`}
                   placeholder="name@example.com"
                 />
-<<<<<<< Updated upstream
-                {errors.email && (
-                  <p className="mt-1 text-xs text-red-500 font-medium">{errors.email}</p>
-                )}
-=======
                 {errors.email && <p className="mt-1 text-sm text-red-500 font-medium">{errors.email}</p>}
->>>>>>> Stashed changes
               </div>
             </div>
 
             {/* Password Input */}
             <div>
               <div className="flex items-center justify-between">
-<<<<<<< Updated upstream
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
-                  Password
-                </label>
-                <div className="text-sm">
-                  <a href="#" className="font-semibold text-black hover:text-black">
-                    Forgot?
-                  </a>
-                </div>
-=======
                 <label htmlFor="password" className="block text-xs font-semibold text-gray-700">Password</label>
                 <div className="text-sm"><a href="#" className="font-semibold text-black hover:text-black">Forgot?</a></div>
->>>>>>> Stashed changes
               </div>
               <div className="mt-1">
                 <input
