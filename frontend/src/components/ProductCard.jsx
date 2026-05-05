@@ -1,5 +1,12 @@
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+function resolveImage(img) {
+  if (!img) return null;
+  return img.startsWith("/uploads") ? `${BASE_URL}${img}` : img;
+}
+
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const isLowStock = product.variants?.some(v => v.stock <= 5 && v.stock > 0);
@@ -11,7 +18,7 @@ export default function ProductCard({ product }) {
     >
       <div className="aspect-[3/4] bg-muted overflow-hidden relative">
         <img
-          src={product.images?.[0] || "https://images.unsplash.com/photo-1523381235212-d73f49380fbb?q=80&w=800&auto=format&fit=crop"}
+          src={resolveImage(product.images?.[0]) || "https://images.unsplash.com/photo-1523381235212-d73f49380fbb?q=80&w=800&auto=format&fit=crop"}
           alt={product.name}
           className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
         />
