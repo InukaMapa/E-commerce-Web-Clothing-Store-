@@ -12,13 +12,6 @@ import { useCart } from "../cart/CartContext";
  * - Multi-image gallery support
  * - Add-to-Cart integration with validation
  */
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-function resolveImage(img) {
-  if (!img) return null;
-  return img.startsWith("/uploads") ? `${BASE_URL}${img}` : img;
-}
-
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,7 +33,6 @@ export default function ProductDetails() {
       try {
         setLoading(true);
         setError(null);
-
         const res = await api.get(`/api/products/${id}`);
         const data = res.data?.data?.product;
 
@@ -175,7 +167,6 @@ export default function ProductDetails() {
             </div>
           </div>
 
-          {/* Product Info */}
           <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
             <h1 className="text-4xl font-bold tracking-tight text-black font-serif uppercase tracking-widest">{product.name}</h1>
 
