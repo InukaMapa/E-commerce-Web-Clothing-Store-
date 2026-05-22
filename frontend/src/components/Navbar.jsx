@@ -26,6 +26,7 @@ export default function Navbar() {
           {/* Nav links and Icons */}
           <div className="flex items-center space-x-8">
             <Link to="/" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Home</Link>
+            <Link to="/cloth" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Shop</Link>
 
             {user && ["producer", "admin"].includes(user.role) && (
               <Link to="/dashboard" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Dashboard</Link>
