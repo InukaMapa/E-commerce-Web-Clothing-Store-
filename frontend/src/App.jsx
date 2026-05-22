@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { CartProvider } from "./cart/CartContext";
@@ -7,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Shop from "./pages/Shop";
+import Cloth from "./pages/Cloth";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -38,6 +40,7 @@ function AppContent() {
             <Navbar />
             <Routes>
               <Route path="/" element={<Shop />} />
+              <Route path="/cloth" element={<Cloth  />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/products/:id" element={<ProductDetails />} />
