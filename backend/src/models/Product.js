@@ -20,7 +20,16 @@ const productSchema = new mongoose.Schema({
     enum: ["pending", "approved", "rejected", "suspended"],
     default: "pending",
   },
-  category: String,
+  category: {
+    type: String,
+    enum: ["T-Shirt", "Shirt", "Hoodies", "Jeans", "Pants", "Shoes", "Caps", "Backpacks", "Wallets", ""],
+    default: "",
+  },
+  gender: {
+    type: String,
+    enum: ["men", "women", "unisex", ""],
+    default: "",
+  },
   tags: [String],
 }, { timestamps: true });
 

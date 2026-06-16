@@ -7,7 +7,7 @@ const SIZES      = ['S', 'M', 'L', 'XL', '2XL'];
 const COLORS     = ['white', 'black'];
 
 //Stability AI 
-const STABILITY_API_KEY = 'sk-HjhYU8SxnAIJpcYIZVYVLSYNFpmBOE8iUw1WNgWcIMc66pUF';
+const STABILITY_API_KEY = 'sk-Og9MM7ujVO57UP8RzlVfYgKNKr52qoUpqoWWxHvgUyIaSdpS';
 
 async function fetchAIGeneratedImage(prompt) {
     const enhancedPrompt = `${prompt.trim()}, t-shirt graphic design, flat vector art, clean background, high quality, standalone`;
@@ -66,6 +66,11 @@ export default function DesignerCanvas() {
         front: null,
         back:  null,
     });
+    // Per-side captured preview images (jpeg data URLs)
+    const [savedPreviews, setSavedPreviews] = useState({
+        front: null,
+        back:  null,
+    });
 
     const [textValue,  setTextValue]  = useState('');
     const [fontFamily, setFontFamily] = useState('Arial');
@@ -79,8 +84,13 @@ export default function DesignerCanvas() {
     const [aiError,       setAiError]       = useState('');
     const [aiLastImage,   setAiLastImage]   = useState('');
 
-    const [selectedSize, setSelectedSize] = useState('M');
-    const [quantity,     setQuantity]     = useState(1);
+    const [quantities, setQuantities] = useState({
+        S: 0,
+        M: 1,
+        L: 0,
+        XL: 0,
+        '2XL': 0
+    });
 
     const [toast, setToast] = useState('');
 
@@ -175,8 +185,11 @@ export default function DesignerCanvas() {
         const canvas = fabricRef.current;
         if (!canvas) return;
 
-        const currentJSON = canvas.toJSON();
-        setSavedDesigns(prev => ({ ...prev, [side]: currentJSON }));
+        // Snapshot the current side's JSON + preview before leaving
+        const currentJSON    = canvas.toJSON();
+        const currentPreview = canvas.toDataURL({ format: 'jpeg', multiplier: 1 });
+        setSavedDesigns(prev  => ({ ...prev, [side]: currentJSON    }));
+        setSavedPreviews(prev => ({ ...prev, [side]: currentPreview }));
 
         canvas.clear();
 
@@ -297,19 +310,37 @@ export default function DesignerCanvas() {
         const canvas = fabricRef.current;
         if (!canvas) return;
 
-        const currentJSON = canvas.toJSON();
-        const previewImage = canvas.toDataURL({ format: 'jpeg', multiplier: 1 });
+        const totalQty = Object.values(quantities).reduce((a, b) => a + b, 0);
+        if (totalQty === 0) {
+            showToast('Please select at least one item quantity.');
+            return;
+        }
+
+        // Capture current visible side
+        const currentJSON    = canvas.toJSON();
+        const currentPreview = canvas.toDataURL({ format: 'jpeg', multiplier: 1 });
+
+        // Merge: current side overrides whatever was saved
+        const allDesigns = {
+            ...savedDesigns,
+            [side]: currentJSON,
+        };
+        const allPreviews = {
+            ...savedPreviews,
+            [side]: currentPreview,
+        };
 
         const payload = {
-            designs: {
-                [side]: currentJSON,
-                ...savedDesigns,
-            },
+            designs:           allDesigns,
+            frontPreviewImage: allPreviews.front || '',
+            backPreviewImage:  allPreviews.back  || '',
+            // legacy field — keep as current side for backward compat
+            previewImage:      currentPreview,
             tshirtColor,
-            size:         selectedSize,
-            quantity,
-            previewImage,
-            submittedAt:  new Date().toISOString(),
+            size:              "Mixed",
+            quantity:          totalQty,
+            sizeQuantities:    quantities,
+            submittedAt:       new Date().toISOString(),
         };
 
         console.log('📦 Sending to admin:', payload);
@@ -581,42 +612,36 @@ export default function DesignerCanvas() {
                             <h2 className="font-serif text-2xl text-black mb-1">Order Details</h2>
                             <p className="text-xs text-gray-400 mb-8 tracking-wide">Configure your physical piece.</p>
 
-                            {/* Size Selection */}
-                            <div className="space-y-4 mb-8">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Size Chart</label>
-                                <div className="grid grid-cols-3 gap-2">
+                            {/* Size & Quantity Selection */}
+                            <div className="space-y-4 mb-10">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Sizes & Quantities</label>
+                                <div className="space-y-2">
                                     {SIZES.map(sz => (
-                                        <button
-                                            key={sz}
-                                            onClick={() => setSelectedSize(sz)}
-                                            className={`py-3 text-[11px] font-black rounded-xl border transition-all ${selectedSize === sz
-                                                    ? 'border-black bg-black text-white shadow-lg'
-                                                    : 'border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200'
-                                                }`}
-                                        >
-                                            {sz}
-                                        </button>
+                                        <div key={sz} className="flex items-center justify-between bg-gray-50 p-2 rounded-2xl border border-gray-100">
+                                            <span className="text-[11px] font-black text-black ml-3 w-8">{sz}</span>
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={() => setQuantities(prev => ({ ...prev, [sz]: Math.max(0, prev[sz] - 1) }))}
+                                                    className="w-8 h-8 bg-white rounded-lg shadow-sm text-black font-black hover:bg-gray-100 transition-colors flex items-center justify-center"
+                                                >
+                                                    −
+                                                </button>
+                                                <span className="w-6 text-center font-black text-black text-xs">{quantities[sz]}</span>
+                                                <button
+                                                    onClick={() => setQuantities(prev => ({ ...prev, [sz]: prev[sz] + 1 }))}
+                                                    className="w-8 h-8 bg-white rounded-lg shadow-sm text-black font-black hover:bg-gray-100 transition-colors flex items-center justify-center"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
-                            </div>
-
-                            {/* Quantity Selection */}
-                            <div className="space-y-4 mb-10">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Quantity</label>
-                                <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100">
-                                    <button
-                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-10 h-10 bg-white rounded-xl shadow-sm text-black font-black hover:bg-gray-100 transition-colors"
-                                    >
-                                        −
-                                    </button>
-                                    <span className="flex-1 text-center font-black text-black text-sm">{quantity}</span>
-                                    <button
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        className="w-10 h-10 bg-white rounded-xl shadow-sm text-black font-black hover:bg-gray-100 transition-colors"
-                                    >
-                                        +
-                                    </button>
+                                <div className="flex justify-between items-center px-2 mt-4">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Quantity</span>
+                                    <span className="text-sm font-black text-black">
+                                        {Object.values(quantities).reduce((a, b) => a + b, 0)}
+                                    </span>
                                 </div>
                             </div>
 
@@ -627,8 +652,8 @@ export default function DesignerCanvas() {
                                     <span className="text-black">{tshirtColor} Tee</span>
                                 </div>
                                 <div className="flex justify-between text-[11px] font-black uppercase tracking-widest">
-                                    <span className="text-gray-400">Fit</span>
-                                    <span className="text-black">{selectedSize} Standard</span>
+                                    <span className="text-gray-400">Total Quantities</span>
+                                    <span className="text-black">{Object.values(quantities).reduce((a, b) => a + b, 0)} Items</span>
                                 </div>
                                 <div className="flex justify-between text-[11px] font-black uppercase tracking-widest">
                                     <span className="text-gray-400">Print Sides</span>

@@ -201,11 +201,11 @@ export default function Shop() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
-          <div className="flex items-center space-x-2">
-            {['Unisex', 'Men', 'Women'].map((filter) => (
+          <div className="flex flex-wrap items-center gap-2">
+            {['All', 'T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map((filter) => (
               <button
                 key={filter}
-                className={`px-6 py-2 text-[10px] uppercase font-bold tracking-[0.2em] border transition-all ${filter === 'Unisex' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-200 hover:border-black'
+                className={`px-4 py-2 text-[10px] uppercase font-bold tracking-[0.2em] border transition-all ${filter === 'All' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-200 hover:border-black'
                   }`}
               >
                 {filter}
@@ -263,8 +263,8 @@ export default function Shop() {
               <div>
                 <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Categories</h3>
                 <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
-                  {['Dresses', 'Tops & Tees', 'Pants', 'Skirts'].map(item => (
-                    <li key={item}><a href="#" className="hover:text-gray-400">{item}</a></li>
+                  {['T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map(item => (
+                    <li key={item}><a href="/cloth" className="hover:text-gray-400">{item}</a></li>
                   ))}
                 </ul>
               </div>

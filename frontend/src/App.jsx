@@ -26,6 +26,7 @@ import AdminOrderManagement from "./pages/admin/Orders";
 import AdminInventory from "./pages/admin/Inventory";
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminCategories from "./pages/admin/Categories";
+import SlaughterStudio from "./pages/admin/SlaughterStudio";
 
 function AppContent() {
   const { user } = useAuth();
@@ -85,7 +86,7 @@ function AppContent() {
                 <Route path="inventory" element={<AdminInventory />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="settings" element={<div>Slaughter Studio (WIP)</div>} />
+                <Route path="settings" element={<SlaughterStudio />} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
               </Routes>
             </DashboardLayout>

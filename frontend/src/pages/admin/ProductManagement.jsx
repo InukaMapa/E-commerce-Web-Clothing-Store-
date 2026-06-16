@@ -20,13 +20,13 @@ import {
 import api from "../../api/axios";
 
 // ── Category → Dimension (Size) Mapping ──────────────────────────────────
-const CATEGORIES = ["Tops", "Pants", "Cap", "Shoes"];
+const CATEGORIES = ["T-Shirt", "Shirt", "Hoodies", "Jeans", "Pants", "Shoes", "Caps", "Backpacks", "Wallets"];
+const GENDERS = ["men", "women", "unisex"];
 
-const DIMENSION_MAP = {
-  Tops: ["XS", "S", "M", "L", "XL", "XXL"],
-  Pants: ["28", "30", "32", "34", "36", "38", "40"],
-  Cap: ["Free Size", "S", "M", "L"],
-  Shoes: ["6", "7", "8", "9", "10", "11", "12"],
+const SIZE_GROUPS = {
+  clothing: ["XS", "S", "M", "L", "XL", "2XL", "XXL", "Free Size"],
+  shoes: ["6", "7", "8", "9", "10", "11", "12"],
+  pants: ["28", "30", "32", "34", "36", "38", "40"],
 };
 
 const AdminProductManagement = () => {
@@ -44,6 +44,7 @@ const AdminProductManagement = () => {
     description: "",
     price: 0,
     category: "",
+    gender: "",
     images: [],
     variants: [], // Changed from dimension/stock to list
     status: "approved",
@@ -52,14 +53,13 @@ const AdminProductManagement = () => {
   const handleOpenModal = (product = null) => {
     if (product) {
       setEditingProduct(product);
-      const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-      const dimension = product.variants?.[0]?.size || "";
       setFormData({
         productId: product._id?.slice(-8).toUpperCase() || "",
         name: product.name,
         description: product.description || "",
         price: product.price,
         category: product.category || "",
+        gender: product.gender || "",
         variants: product.variants || [], // Use actual variants
         images: product.images || [],
         status: product.status || "approved",
@@ -73,6 +73,7 @@ const AdminProductManagement = () => {
         description: "",
         price: 0,
         category: "",
+        gender: "",
         variants: [{ size: "", color: "Default", stock: 0, sku: "" }],
         images: [],
         status: "approved",
@@ -97,6 +98,7 @@ const AdminProductManagement = () => {
         description: formData.description,
         price: formData.price,
         category: formData.category,
+        gender: formData.gender,
         images: formData.images.filter((img) => img.trim() !== ""),
         status: formData.status,
         variants: formData.variants, // Pass all variants
@@ -498,7 +500,7 @@ const AdminProductManagement = () => {
                 />
               </div>
 
-              {/* Row: Price + Category */}
+              {/* Row: Price + Category + Gender */}
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 block">
@@ -520,19 +522,12 @@ const AdminProductManagement = () => {
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 block">
-                    Category
+                    Category (Product Type)
                   </label>
                   <select
                     required
                     value={formData.category}
-                    onChange={(e) => {
-                      const newCategory = e.target.value;
-                      setFormData({
-                        ...formData,
-                        category: newCategory,
-                        dimension: "",
-                      });
-                    }}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full border border-black/10 px-5 py-4 text-xs font-bold uppercase tracking-widest outline-none focus:border-black transition-all bg-white"
                   >
                     <option value="" disabled>SELECT CATEGORY</option>
@@ -540,6 +535,29 @@ const AdminProductManagement = () => {
                       <option key={cat} value={cat}>{cat.toUpperCase()}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 block">
+                  Gender
+                </label>
+                <div className="flex gap-3">
+                  {GENDERS.map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, gender: g })}
+                      className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest border transition-all ${
+                        formData.gender === g
+                          ? "bg-black text-white border-black"
+                          : "bg-white text-black border-black/20 hover:border-black"
+                      }`}
+                    >
+                      {g}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -570,9 +588,21 @@ const AdminProductManagement = () => {
                         className="w-full bg-transparent text-[10px] font-bold uppercase outline-none"
                       >
                         <option value="" disabled>SIZE</option>
-                        {(DIMENSION_MAP[formData.category] || []).map((size) => (
-                          <option key={size} value={size}>{size}</option>
-                        ))}
+                        <optgroup label="CLOTHING SIZES">
+                          {SIZE_GROUPS.clothing.map((size) => (
+                            <option key={size} value={size}>{size}</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="RECOMMENDED SHOE SIZES">
+                          {SIZE_GROUPS.shoes.map((size) => (
+                            <option key={size} value={size}>{size}</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="PANTS / WAIST SIZES">
+                          {SIZE_GROUPS.pants.map((size) => (
+                            <option key={size} value={size}>{size}</option>
+                          ))}
+                        </optgroup>
                       </select>
                     </div>
                     <div>

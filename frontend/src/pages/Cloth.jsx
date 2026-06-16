@@ -9,6 +9,7 @@ export default function Shop() {
   const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const currentGender = searchParams.get("gender") || "all";
+  const currentCategory = searchParams.get("category") || "all";
   const currentSort = searchParams.get("sort") || "best_selling";
   const currentSize = searchParams.get("size") || "";
   const currentAvailability = searchParams.get("availability") || "";
@@ -65,6 +66,7 @@ export default function Shop() {
         
         const params = new URLSearchParams();
         if (currentGender !== "all") params.append("gender", currentGender);
+        if (currentCategory !== "all") params.append("category", currentCategory);
         if (currentSort) params.append("sort", currentSort);
         if (currentSize) params.append("size", currentSize);
         if (currentAvailability) params.append("availability", currentAvailability);
@@ -93,7 +95,7 @@ export default function Shop() {
     return () => {
       isMounted = false;
     };
-  }, [currentGender, currentSort, currentSize, currentAvailability, currentMinPrice, currentMaxPrice, refreshTrigger]);
+  }, [currentGender, currentCategory, currentSort, currentSize, currentAvailability, currentMinPrice, currentMaxPrice, refreshTrigger]);
 
   const handleFilterChange = (key, value) => {
     if (!value || value === "all") {
@@ -167,11 +169,11 @@ export default function Shop() {
               <Link to="/" className="hover:text-black">Home</Link>
               <span>/</span>
               <span className="text-black">
-                {currentGender === "all" ? "Shop All" : `${currentGender.toUpperCase()}'S WEAR`}
+                {currentCategory !== "all" ? currentCategory.toUpperCase() : currentGender === "all" ? "Shop All" : `${currentGender.toUpperCase()}'S WEAR`}
               </span>
             </nav>
             <h1 className="text-4xl md:text-5xl font-serif font-black uppercase tracking-[0.1em] text-black">
-              {currentGender === "all" ? "Our Collection" : `${currentGender}'s Wear`}
+              {currentCategory !== "all" ? currentCategory : currentGender === "all" ? "Our Collection" : `${currentGender}'s Wear`}
             </h1>
           </div>
 
@@ -198,7 +200,7 @@ export default function Shop() {
         </div>
 
         {/* Gender Filter Tabs */}
-        <div className="flex gap-8 mb-12 border-b border-gray-100 pb-2">
+        <div className="flex gap-8 mb-6 border-b border-gray-100 pb-2">
             {["all", "men", "women", "unisex"].map((g) => (
               <button
                 key={g}
@@ -212,6 +214,33 @@ export default function Shop() {
                 {g === "all" ? "Shop All" : `${g}'s`}
               </button>
             ))}
+        </div>
+
+        {/* Product Category Filter Tabs */}
+        <div className="flex flex-wrap gap-3 mb-10">
+          <button
+            onClick={() => handleFilterChange("category", "all")}
+            className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest border transition-all ${
+              currentCategory === "all"
+                ? "bg-black text-white border-black"
+                : "bg-white text-black border-gray-200 hover:border-black"
+            }`}
+          >
+            All
+          </button>
+          {["T-Shirt", "Shirt", "Hoodies", "Jeans", "Pants", "Shoes", "Caps", "Backpacks", "Wallets"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => handleFilterChange("category", currentCategory === cat ? "all" : cat)}
+              className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest border transition-all ${
+                currentCategory === cat
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-black border-gray-200 hover:border-black"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-16">
@@ -381,8 +410,8 @@ export default function Shop() {
               <div>
                 <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Categories</h3>
                 <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
-                  {['Dresses', 'Tops & Tees', 'Pants', 'Skirts'].map(item => (
-                    <li key={item}><a href="#" className="hover:text-gray-400">{item}</a></li>
+                  {['T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map(item => (
+                    <li key={item}><a href={`/cloth?category=${item}`} className="hover:text-gray-400">{item}</a></li>
                   ))}
                 </ul>
               </div>

@@ -122,9 +122,9 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    const { name, description, price, images, variants } = req.body;
+    const { name, description, price, images, variants, category, gender, status } = req.body;
     const product = await productService.create(
-      { name, description, price, images, variants },
+      { name, description, price, images, variants, category, gender, status },
       req.user.id
     );
 
@@ -196,13 +196,16 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
-    const { name, description, price, images, variants } = req.body;
+    const { name, description, price, images, variants, category, gender, status } = req.body;
     const product = await productService.update(req.params.id, {
       ...(name !== undefined && { name }),
       ...(description !== undefined && { description }),
       ...(price !== undefined && { price }),
       ...(images !== undefined && { images }),
       ...(variants !== undefined && { variants }),
+      ...(category !== undefined && { category }),
+      ...(gender !== undefined && { gender }),
+      ...(status !== undefined && { status }),
     });
 
     // ── Audit Log ─────────────────────────────────────────────────────────
