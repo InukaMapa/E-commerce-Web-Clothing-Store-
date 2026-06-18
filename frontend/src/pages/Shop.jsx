@@ -17,10 +17,10 @@ import quote from "../assets/quote.png";
  */
 export default function Shop() {
   const [products, setProducts] = useState([]);
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const navigate = useNavigate();
 
@@ -33,8 +33,6 @@ export default function Shop() {
       const res = await api.get("/api/products");
       const fetchedProducts = res.data?.data?.products || [];
       setProducts(fetchedProducts);
-      // For now, set recommended products as a slice of all products
-      setRecommendedProducts(fetchedProducts.slice(0, 4));
     } catch (err) {
       console.error("Shop page fetch error:", err);
       setError("Failed to load products. Please check your connection and try again.");
@@ -51,6 +49,10 @@ export default function Shop() {
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const displayedCategoryProducts = selectedCategory === "All"
+    ? products
+    : products.filter((p) => p.category === selectedCategory);
 
   // ── Render Helpers ──────────────────────────────────────────────────────
 
@@ -110,39 +112,33 @@ export default function Shop() {
         </div>
       </header>
 
-      {/* Customization Banner */}
-      <section className="bg-zinc-100 py-20 px-4 text-center">
-        <div className="max-w-5xl mx-auto border border-black py-8">
-          <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-widest mb-6">
-            Customize Your Own T-Shirt
+      {/* Customization Banner - Redesigned */}
+      <section className="w-full bg-black text-white relative overflow-hidden py-24 lg:py-32">
+        {/* Subtle background elements */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 mb-6 font-bold">Slaughter Studio Exclusive</p>
+          <h2 className="text-4xl md:text-6xl font-serif font-black uppercase tracking-widest mb-8 leading-tight">
+            Design Your <br className="hidden md:block"/> Signature Style
           </h2>
-          <p className="text-gray-600 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
-            Unleash your creativity and design a unique style that represents you. Our premium customization process ensures your vision comes to life with precision and quality.
+          <p className="text-sm text-gray-300 mb-12 max-w-xl mx-auto leading-relaxed tracking-widest uppercase">
+            Unleash your creativity. Our premium customization studio lets you personalize fabrics, cuts, and graphics to create a piece that is unmistakably yours.
           </p>
           <button
             onClick={() => navigate("/customization-info")}
-            className="bg-black text-white px-10 py-4 uppercase tracking-widest text-sm font-bold hover:bg-zinc-800 transition-colors duration-300"
+            className="group relative inline-flex items-center justify-center bg-white text-black px-12 py-5 overflow-hidden transition-all duration-300"
           >
-            Start Customizing
+            <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-gray-200 rounded-full group-hover:w-full group-hover:h-56"></span>
+            <span className="relative text-[10px] uppercase font-black tracking-[0.3em] flex items-center gap-4">
+              Enter The Studio
+              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </span>
           </button>
         </div>
-      </section>
-
-      {/* Recommended Products */}
-      <section className="mx-auto max-w-7xl px-4 py-20">
-        <div className="mb-10">
-          <h2 className="text-3xl font-bold uppercase tracking-widest text-black">Recommended For You</h2>
-          <p className="text-gray-500 text-xs mt-2 uppercase tracking-widest">Based on your shopping activity</p>
-        </div>
-        {recommendedProducts.length === 0 ? (
-          <p className="text-gray-400">No recommendations yet</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recommendedProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        )}
       </section>
 
       {/* Gender Categories */}
@@ -193,11 +189,11 @@ export default function Shop() {
         </div>
       </section>
 
-      {/* T-Shirts Collection */}
+      {/* Dynamic Collection Section */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-        <div className="mb-12">
-          <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black mb-2">T-Shirts Collection</h2>
-          <p className="text-xs text-gray-400 uppercase tracking-widest">Discover Our T-Shirts Collection</p>
+        <div className="mb-12 text-center md:text-left">
+          <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black mb-2">Explore Our Collection</h2>
+          <p className="text-xs text-gray-400 uppercase tracking-widest">Discover Curated Styles For Every Occasion</p>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
@@ -205,22 +201,35 @@ export default function Shop() {
             {['All', 'T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map((filter) => (
               <button
                 key={filter}
-                className={`px-4 py-2 text-[10px] uppercase font-bold tracking-[0.2em] border transition-all ${filter === 'All' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-200 hover:border-black'
-                  }`}
+                onClick={() => setSelectedCategory(filter)}
+                className={`px-4 py-2 text-[10px] uppercase font-bold tracking-[0.2em] border transition-all ${
+                  selectedCategory === filter 
+                    ? 'bg-black text-white border-black' 
+                    : 'bg-white text-black border-gray-200 hover:border-black'
+                }`}
               >
                 {filter}
               </button>
             ))}
           </div>
-          <button className="text-[10px] uppercase font-bold tracking-widest border-b border-black pb-1 hover:opacity-60 transition-opacity">
-            View All T-Shirts Collection
+          <button 
+            onClick={() => navigate('/cloth')}
+            className="text-[10px] uppercase font-bold tracking-widest border-b border-black pb-1 hover:opacity-60 transition-opacity"
+          >
+            View All Products
           </button>
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-          {products.slice(0, 4).map((product) => (
-            <ProductCard key={`${product._id}-collection`} product={product} />
-          ))}
+          {displayedCategoryProducts.length === 0 ? (
+            <p className="col-span-full text-center text-gray-400 py-10 uppercase tracking-widest text-xs">
+              No products found in this category.
+            </p>
+          ) : (
+            displayedCategoryProducts.slice(0, 8).map((product) => (
+              <ProductCard key={`${product._id}-collection`} product={product} />
+            ))
+          )}
         </div>
       </section>
 

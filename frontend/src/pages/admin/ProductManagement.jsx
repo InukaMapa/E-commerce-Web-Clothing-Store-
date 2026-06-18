@@ -67,14 +67,15 @@ const AdminProductManagement = () => {
       setImagePreview(product.images?.[0] || "");
     } else {
       setEditingProduct(null);
+      const newProductId = generateProductId();
       setFormData({
-        productId: generateProductId(),
+        productId: newProductId,
         name: "",
         description: "",
         price: 0,
         category: "",
         gender: "",
-        variants: [{ size: "", color: "Default", stock: 0, sku: "" }],
+        variants: [{ size: "", color: "Default", stock: 0, sku: newProductId }],
         images: [],
         status: "approved",
       });
@@ -105,7 +106,7 @@ const AdminProductManagement = () => {
       };
 
       if (editingProduct) {
-        await api.put(`/api/products/${editingProduct._id}`, payload);
+        await api.put(`/api/admin/products/${editingProduct._id}`, payload);
       } else {
         await api.post("/api/products", payload);
       }
@@ -160,6 +161,9 @@ const AdminProductManagement = () => {
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
     newVariants[index][field] = value;
+    if (field === "size" && formData.productId) {
+      newVariants[index].sku = `${formData.productId}-${value.toString().toUpperCase().replace(/\s+/g, "")}`;
+    }
     setFormData({ ...formData, variants: newVariants });
   };
 
@@ -206,7 +210,7 @@ const AdminProductManagement = () => {
   const deleteProduct = async (id) => {
     if (!window.confirm("ARE YOU SURE? THIS ACTION IS PERMANENT.")) return;
     try {
-      await api.delete(`/api/admin/products/${id}`);
+      await api.delete(`/api/products/${id}`);
       fetchProducts();
     } catch (err) {
       alert("Deletion failed");
@@ -453,12 +457,17 @@ const AdminProductManagement = () => {
                   <input
                     type="text"
                     value={formData.productId}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const newId = e.target.value.toUpperCase();
                       setFormData({
                         ...formData,
-                        productId: e.target.value.toUpperCase(),
-                      })
-                    }
+                        productId: newId,
+                        variants: formData.variants.map((v) => ({
+                          ...v,
+                          sku: v.size ? `${newId}-${v.size.toString().toUpperCase().replace(/\s+/g, "")}` : newId,
+                        })),
+                      });
+                    }}
                     placeholder="PRD-XXXXXX"
                     className="w-full bg-transparent text-sm font-mono font-bold text-black outline-none tracking-widest"
                     readOnly={!!editingProduct}
