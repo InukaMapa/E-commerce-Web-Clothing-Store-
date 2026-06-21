@@ -228,7 +228,7 @@ export default function Shop() {
           >
             All
           </button>
-          {["T-Shirt", "Shirt", "Hoodies", "Jeans", "Pants", "Shoes", "Caps", "Backpacks", "Wallets"].map((cat) => (
+          {["T-Shirt", "Shirt", "Hoodies", "Jeans", "Pants", "Shoes", "Caps", "Backpacks", "Wallets", "Skirt", "Frocks"].map((cat) => (
             <button
               key={cat}
               onClick={() => handleFilterChange("category", currentCategory === cat ? "all" : cat)}
