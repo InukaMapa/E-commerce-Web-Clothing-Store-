@@ -30,7 +30,7 @@ export default function Shop() {
       setLoading(true);
       setError(null);
       // Backend controller returns: { success, message, data: { products, pagination } }
-      const res = await api.get("/api/products");
+      const res = await api.get("/api/products?limit=100");
       const fetchedProducts = res.data?.data?.products || [];
       setProducts(fetchedProducts);
     } catch (err) {
@@ -50,9 +50,22 @@ export default function Shop() {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const normalizeCategory = (cat) => {
+    if (!cat) return "";
+    return cat.toLowerCase().replace(/[^a-z]/g, '');
+  };
+
   const displayedCategoryProducts = selectedCategory === "All"
     ? products
-    : products.filter((p) => p.category === selectedCategory);
+    : products.filter((p) => {
+        if (!p.category) return false;
+        const pCat = normalizeCategory(p.category);
+        const sCat = normalizeCategory(selectedCategory);
+        // If one is empty after normalization, they don't match
+        if (!pCat || !sCat) return false;
+        // Loose match: either one contains the other (handles most singular/plural/typos)
+        return pCat.includes(sCat) || sCat.includes(pCat);
+      });
 
   // ── Render Helpers ──────────────────────────────────────────────────────
 
@@ -106,7 +119,10 @@ export default function Shop() {
           <h1 className="text-5xl md:text-7xl font-serif font-bold uppercase tracking-widest leading-none mb-8">
             Trendy, <br /> Stylish, <br /> Brand New!
           </h1>
-          <button className="bg-white text-black px-8 py-3 text-[14px] uppercase font-bold tracking-widest hover:bg-black hover:text-white transition-all duration-300">
+          <button 
+            onClick={() => navigate('/cloth')}
+            className="bg-white text-black px-8 py-3 text-[14px] uppercase font-bold tracking-widest hover:bg-black hover:text-white transition-all duration-300"
+          >
             Shop Now
           </button>
         </div>
@@ -178,7 +194,10 @@ export default function Shop() {
             <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black">Latest Arrivals</h2>
             <p className="text-xs text-gray-400 uppercase tracking-widest mt-2">Discover Our Latest Arrivals And Timeless Classics.</p>
           </div>
-          <button className="bg-black text-white px-6 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-800 transition-all">
+          <button 
+            onClick={() => navigate('/cloth')}
+            className="bg-black text-white px-6 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-800 transition-all"
+          >
             Shop All
           </button>
         </div>
@@ -198,7 +217,7 @@ export default function Shop() {
 
         <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
           <div className="flex flex-wrap items-center gap-2">
-            {['All', 'T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map((filter) => (
+            {['All', 'T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setSelectedCategory(filter)}
@@ -223,7 +242,7 @@ export default function Shop() {
         <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
           {displayedCategoryProducts.length === 0 ? (
             <p className="col-span-full text-center text-gray-400 py-10 uppercase tracking-widest text-xs">
-              No products found in this category.
+              No products found in this category. 
             </p>
           ) : (
             displayedCategoryProducts.slice(0, 8).map((product) => (
@@ -272,7 +291,7 @@ export default function Shop() {
               <div>
                 <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Categories</h3>
                 <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
-                  {['T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map(item => (
+                  {['T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Pants', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map(item => (
                     <li key={item}><a href="/cloth" className="hover:text-gray-400">{item}</a></li>
                   ))}
                 </ul>
