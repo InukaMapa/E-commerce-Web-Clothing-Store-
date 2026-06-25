@@ -52,7 +52,7 @@ export default function Navbar() {
       </div>
 
       {/* ── TIER 2: Nav links row ── */}
-      <div className="w-full px-8">
+      <div className="w-full px-8 -mt-3">
         <div className="flex items-center h-[44px]">
 
           {/* LEFT: Nav Links */}
