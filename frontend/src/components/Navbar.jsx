@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useCart } from "../cart/CartContext";
 import logo from "../assets/logo.png";
@@ -8,7 +8,13 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { items } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const cartCount = items.reduce((sum, x) => sum + x.quantity, 0);
+
+  const isActive = (path) => location.pathname === path;
+  const linkBaseClass = "text-xs font-medium transition-all uppercase tracking-widest pb-1 border-b-2";
+  const getLinkClass = (path) => 
+    `${linkBaseClass} ${isActive(path) || (path !== '/' && location.pathname.startsWith(path)) ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'}`;
 
   return (
     <nav className="sticky top-0 z-50 bg-black text-white py-4">
@@ -25,11 +31,11 @@ export default function Navbar() {
           </Link>
           {/* Nav links and Icons */}
           <div className="flex items-center space-x-8">
-            <Link to="/" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Home</Link>
-            <Link to="/cloth" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Shop</Link>
+            <Link to="/" className={getLinkClass("/")}>Home</Link>
+            <Link to="/cloth" className={getLinkClass("/cloth")}>Shop</Link>
 
             {user && ["producer", "admin"].includes(user.role) && (
-              <Link to="/dashboard" className="text-xs font-medium hover:opacity-70 transition-opacity uppercase tracking-widest">Dashboard</Link>
+              <Link to="/dashboard" className={getLinkClass("/dashboard")}>Dashboard</Link>
             )}
 
             <div className="flex items-center space-x-5">

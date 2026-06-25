@@ -366,7 +366,7 @@ export default function DesignerCanvas() {
     return (
         <div className="flex flex-col min-h-screen bg-white font-sans selection:bg-black selection:text-white">
             {/* ═══════════════════  TITLE SECTION  ═══════════════════ */}
-            <div className="max-w-7xl mx-auto w-full px-6 pt-32 pb-8">
+            <div className="max-w-7xl mx-auto w-full px-6 pt-8 pb-8">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-100 pb-8">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-serif text-black leading-tight">
@@ -569,11 +569,22 @@ export default function DesignerCanvas() {
                     </aside>
 
                     {/* ─── CENTER: CANVAS ─── */}
-                    <main className="lg:col-span-6 flex flex-col items-center">
-                        <div className="relative group">
+                    <main className="lg:col-span-6 flex flex-col items-center justify-center">
+                        <div className="relative group w-full max-w-[500px] mx-auto">
                             {/* Premium frame around canvas */}
-                            <div className="bg-white rounded-[40px] border border-gray-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-12 transition-transform duration-700">
-                                <div className="relative overflow-hidden rounded-2xl bg-gray-50 shadow-inner border border-gray-100">
+                            <div className="bg-white rounded-[40px] border border-gray-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-4 sm:p-8 transition-transform duration-700 w-full flex justify-center">
+                                <div className="relative overflow-hidden rounded-2xl bg-gray-50 shadow-inner border border-gray-100 w-full max-w-[400px]">
+                                    <style>{`
+                                        .canvas-container {
+                                            margin: 0 auto;
+                                            max-width: 100%;
+                                            height: auto !important;
+                                        }
+                                        .canvas-container canvas {
+                                            max-width: 100%;
+                                            height: auto !important;
+                                        }
+                                    `}</style>
                                     <canvas ref={canvasRef} />
                                 </div>
                             </div>

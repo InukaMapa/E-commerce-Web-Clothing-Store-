@@ -129,24 +129,24 @@ export default function Shop() {
       </header>
 
       {/* Customization Banner - Redesigned */}
-      <section className="w-full bg-black text-white relative overflow-hidden py-24 lg:py-32">
+      <section className="w-full bg-gradient-to-br from-zinc-50 via-gray-100 to-zinc-200 text-black relative overflow-hidden py-24 lg:py-32 border-y border-gray-200 shadow-inner">
         {/* Subtle background elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-black/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-black/5 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 mb-6 font-bold">Slaughter Studio Exclusive</p>
-          <h2 className="text-4xl md:text-6xl font-serif font-black uppercase tracking-widest mb-8 leading-tight">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-gray-500 mb-6 font-bold">Slaughter Studio Exclusive</p>
+          <h2 className="text-4xl md:text-6xl font-serif font-black uppercase tracking-widest mb-8 leading-tight drop-shadow-sm">
             Design Your <br className="hidden md:block"/> Signature Style
           </h2>
-          <p className="text-sm text-gray-300 mb-12 max-w-xl mx-auto leading-relaxed tracking-widest uppercase">
+          <p className="text-sm text-gray-600 mb-12 max-w-xl mx-auto leading-relaxed tracking-widest uppercase font-medium">
             Unleash your creativity. Our premium customization studio lets you personalize fabrics, cuts, and graphics to create a piece that is unmistakably yours.
           </p>
           <button
             onClick={() => navigate("/customization-info")}
-            className="group relative inline-flex items-center justify-center bg-white text-black px-12 py-5 overflow-hidden transition-all duration-300"
+            className="group relative inline-flex items-center justify-center bg-black text-white px-12 py-5 overflow-hidden transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
           >
-            <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-gray-200 rounded-full group-hover:w-full group-hover:h-56"></span>
+            <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-zinc-800 rounded-full group-hover:w-full group-hover:h-56"></span>
             <span className="relative text-[10px] uppercase font-black tracking-[0.3em] flex items-center gap-4">
               Enter The Studio
               <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,7 +217,7 @@ export default function Shop() {
 
         <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
           <div className="flex flex-wrap items-center gap-2">
-            {['All', 'T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map((filter) => (
+            {['All', 'T-Shirt', 'Shirt', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setSelectedCategory(filter)}
@@ -291,7 +291,7 @@ export default function Shop() {
               <div>
                 <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Categories</h3>
                 <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
-                  {['T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map(item => (
+                  {['T-Shirt', 'Shirt', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map(item => (
                     <li key={item}><a href="/cloth" className="hover:text-gray-400">{item}</a></li>
                   ))}
                 </ul>

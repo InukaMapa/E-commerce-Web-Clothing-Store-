@@ -228,7 +228,7 @@ export default function Shop() {
           >
             All
           </button>
-          {["T-Shirt", "Shirt", "Hoodies", "Jeans", "Shoes", "Caps", "Backpacks", "Wallets", "Skirt", "Frocks"].map((cat) => (
+          {["T-Shirt", "Shirt", "Jeans", "Shoes", "Caps", "Backpacks", "Wallets", "Skirt", "Frocks"].map((cat) => (
             <button
               key={cat}
               onClick={() => handleFilterChange("category", currentCategory === cat ? "all" : cat)}
@@ -249,7 +249,7 @@ export default function Shop() {
           <main className="flex-1">
 
             {/* Product Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
               {products.length === 0 ? (
                 <div className="col-span-full text-center py-20 text-gray-500 uppercase tracking-widest text-xs">
                   No products found in this category.
@@ -303,7 +303,7 @@ export default function Shop() {
               <div>
                 <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Categories</h3>
                 <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
-                  {['T-Shirt', 'Shirt', 'Hoodies', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map(item => (
+                  {['T-Shirt', 'Shirt', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets'].map(item => (
                     <li key={item}><a href={`/cloth?category=${item}`} className="hover:text-gray-400">{item}</a></li>
                   ))}
                 </ul>
