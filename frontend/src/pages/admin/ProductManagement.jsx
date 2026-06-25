@@ -20,7 +20,7 @@ import {
 import api from "../../api/axios";
 
 // ── Category → Dimension (Size) Mapping ──────────────────────────────────
-const CATEGORIES = ["T-Shirt", "Shirt", "Hoodies", "Jeans", "Pants", "Shoes", "Caps", "Backpacks", "Wallets", "Skirt", "Frocks"];
+const CATEGORIES = ["T-Shirt", "Shirt", "Hoodies", "Jeans", "Shoes", "Caps", "Backpacks", "Wallets", "Skirt", "Frocks"];
 const GENDERS = ["men", "women", "unisex"];
 
 const SIZE_GROUPS = {
