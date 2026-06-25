@@ -128,75 +128,19 @@ export default function Shop() {
         </div>
       </header>
 
-      {/* Customization Banner - Redesigned */}
-      <section className="w-full bg-gradient-to-br from-zinc-50 via-gray-100 to-zinc-200 text-black relative overflow-hidden py-24 lg:py-32 border-y border-gray-200 shadow-inner">
-        {/* Subtle background elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-black/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-black/5 rounded-full blur-3xl pointer-events-none"></div>
-        
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-gray-500 mb-6 font-bold">Slaughter Studio Exclusive</p>
-          <h2 className="text-4xl md:text-6xl font-serif font-black uppercase tracking-widest mb-8 leading-tight drop-shadow-sm">
-            Design Your <br className="hidden md:block"/> Signature Style
-          </h2>
-          <p className="text-sm text-gray-600 mb-12 max-w-xl mx-auto leading-relaxed tracking-widest uppercase font-medium">
-            Unleash your creativity. Our premium customization studio lets you personalize fabrics, cuts, and graphics to create a piece that is unmistakably yours.
-          </p>
-          <button
-            onClick={() => navigate("/customization-info")}
-            className="group relative inline-flex items-center justify-center bg-black text-white px-12 py-5 overflow-hidden transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
-          >
-            <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-zinc-800 rounded-full group-hover:w-full group-hover:h-56"></span>
-            <span className="relative text-[10px] uppercase font-black tracking-[0.3em] flex items-center gap-4">
-              Enter The Studio
-              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </span>
-          </button>
-        </div>
-      </section>
-
-      {/* Gender Categories */}
-      <section className="grid grid-cols-1 md:grid-cols-2 h-[600px] w-full">
-        <div className="relative group cursor-pointer overflow-hidden">
-          <img
-            src={men}
-            alt="Shop Men"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 brightness-75 category-zoom"
-          />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
-            <h2 className="text-4xl font-serif font-bold uppercase tracking-widest mb-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">Shop Men</h2>
-            <button className="bg-white text-black px-8 py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500">
-              View Products
-            </button>
-          </div>
-        </div>
-        <div className="relative group cursor-pointer overflow-hidden">
-          <img
-            src={women}
-            alt="Shop Women"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 brightness-75 category-zoom"
-          />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
-            <h2 className="text-4xl font-serif font-bold uppercase tracking-widest mb-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">Shop Women</h2>
-            <button className="bg-white text-black px-8 py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500">
-              View Products
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Latest Arrivals */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      {/* ── Latest Arrivals ── replaces the old Studio banner */}
+      <section className="mx-auto max-w-7xl px-4 pt-20 pb-10 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-12">
           <div>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 mb-2 font-bold">New In</p>
             <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black">Latest Arrivals</h2>
-            <p className="text-xs text-gray-400 uppercase tracking-widest mt-2">Discover Our Latest Arrivals And Timeless Classics.</p>
+            <p className="text-xs text-gray-400 uppercase tracking-widest mt-2">
+              Discover our freshest drops — style that speaks first.
+            </p>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/cloth')}
-            className="bg-black text-white px-6 py-2 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-800 transition-all"
+            className="bg-black text-white px-6 py-2.5 text-[10px] uppercase font-bold tracking-widest hover:bg-gray-800 transition-all"
           >
             Shop All
           </button>
@@ -207,6 +151,56 @@ export default function Shop() {
           ))}
         </div>
       </section>
+
+      {/* ── Gender Categories ── */}
+      <section className="grid grid-cols-1 md:grid-cols-2 h-[600px] w-full mt-10">
+        {/* Men */}
+        <div
+          className="relative group cursor-pointer overflow-hidden"
+          onClick={() => navigate('/cloth?gender=men')}
+        >
+          <img
+            src={men}
+            alt="Shop Men"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 brightness-75 category-zoom"
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
+            <h2 className="text-4xl font-serif font-bold uppercase tracking-widest mb-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+              Shop Men
+            </h2>
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate('/cloth?gender=men'); }}
+              className="bg-white text-black px-8 py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-black hover:text-white"
+            >
+              View Products
+            </button>
+          </div>
+        </div>
+
+        {/* Women */}
+        <div
+          className="relative group cursor-pointer overflow-hidden"
+          onClick={() => navigate('/cloth?gender=women')}
+        >
+          <img
+            src={women}
+            alt="Shop Women"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 brightness-75 category-zoom"
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
+            <h2 className="text-4xl font-serif font-bold uppercase tracking-widest mb-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+              Shop Women
+            </h2>
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate('/cloth?gender=women'); }}
+              className="bg-white text-black px-8 py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-black hover:text-white"
+            >
+              View Products
+            </button>
+          </div>
+        </div>
+      </section>
+
 
       {/* Dynamic Collection Section */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">

@@ -16,6 +16,7 @@ import DashboardRedirect from "./pages/DashboardRedirect";
 import CustomizationInfo from "./pages/CustomizationInfo";
 import CustomizeCanvas from "./pages/CustomizeCanvas";
 import NotFound from "./pages/NotFound";
+import UserProfile from "./pages/UserProfile";
 
 // Admin Dashboard Pages
 import DashboardLayout from "./components/dashboard/DashboardLayout";
@@ -56,6 +57,7 @@ function AppContent() {
               />
               <Route path="/customization-info" element={<CustomizationInfo />} />
               <Route path="/customize-canvas" element={<CustomizeCanvas />} />
+              <Route path="/profile" element={<UserProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </>
