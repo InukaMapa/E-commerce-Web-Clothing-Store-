@@ -5,11 +5,12 @@ import {
   Package,
   ShoppingCart,
   Users,
-  Settings,
+  Palette,
   LogOut,
   LayoutDashboard,
   Tag,
   Bell,
+  Eye,
 } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -24,7 +25,8 @@ const Sidebar = () => {
     { name: "Users", path: "/admin/users", icon: Users },
     { name: "Categories", path: "/admin/categories", icon: Tag },
     { name: "Analytics", path: "/admin/analytics", icon: BarChart3 },
-    { name: "Slaughter Studio", path: "/admin/settings", icon: Settings },
+    { name: "Slaughter Studio", path: "/admin/settings", icon: Palette },
+    { name: "View as User", path: "/", icon: Eye },
   ];
 
   const links = isAdmin ? adminLinks : [];

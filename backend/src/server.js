@@ -3,6 +3,10 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
+const dns = require("dns");
+
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 connectDB();
 
 const app = express();
@@ -18,7 +22,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 // ── Routes ────────────────────────────────────────────────────────────────
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/products", require("./routes/product.routes"));
-app.use("/api/orders", require("./routes/order.routes"));
+app.use("/api/orders", require("./routes/order.r outes"));
 app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/producer", require("./routes/producer.routes"));

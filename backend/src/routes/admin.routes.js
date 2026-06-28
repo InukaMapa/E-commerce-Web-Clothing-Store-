@@ -37,4 +37,8 @@ router.post("/categories", adminAuth, adminController.createCategory);
 router.get("/orders", adminAuth, adminController.getAllOrders);
 router.put("/orders/:id/status", adminAuth, adminController.updateOrderStatus);
 
+// Slaughter Studio — Custom Design Management
+router.get("/custom-designs", adminAuth, adminController.getCustomDesigns);
+router.put("/custom-designs/:id/status", adminAuth, adminController.updateCustomDesignStatus);
+
 module.exports = router;
