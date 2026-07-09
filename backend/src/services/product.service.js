@@ -11,12 +11,24 @@ exports.list = async (query) => {
     maxPrice,
     size,
     color,
+    gender,
+    category,
     sort: sortParam,
     page = 1,
     limit = 12,
   } = query;
 
-  const filter = {};
+  const filter = { status: "approved" };
+
+  // ── Gender Filter ───────────────────────────────────────
+  if (gender) {
+    filter.gender = new RegExp(`^${gender}$`, "i");
+  }
+
+  // ── Product Category (Type) Filter ─────────────────────────
+  if (category) {
+    filter.category = new RegExp(`^${category}$`, "i");
+  }
 
   // ── Full-text / regex search on name & description ──────────────────────
   if (search) {

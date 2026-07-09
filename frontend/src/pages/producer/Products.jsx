@@ -14,6 +14,9 @@ import api from "../../api/axios";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+const PRODUCT_CATEGORIES = ["T-Shirt", "Shirt", "Jeans", "Skirt", "Frock"];
+const GENDERS = ["men", "women", "unisex"];
+
 function resolveImage(img) {
   if (!img) return null;
   return img.startsWith("/uploads") ? `${BASE_URL}${img}` : img;
@@ -30,6 +33,7 @@ const MyProducts = () => {
     description: "",
     price: 0,
     category: "",
+    gender: "",
     variants: [{ size: "M", color: "Black", stock: 10, sku: "" }],
     images: [],
   });
@@ -57,6 +61,7 @@ const MyProducts = () => {
         description: product.description,
         price: product.price,
         category: product.category || "",
+        gender: product.gender || "",
         variants: product.variants || [
           { size: "M", color: "Black", stock: 10, sku: "" },
         ],
@@ -69,6 +74,7 @@ const MyProducts = () => {
         description: "",
         price: 0,
         category: "",
+        gender: "",
         variants: [{ size: "M", color: "Black", stock: 10, sku: "" }],
         images: [],
       });
@@ -284,15 +290,36 @@ const MyProducts = () => {
                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3 block">
                       Category Classification
                     </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. OUTERWEAR"
+                    <select
+                      required
                       value={formData.category}
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className="w-full border-b border-black/10 py-3 text-xs font-bold uppercase tracking-widest outline-none focus:border-black transition-all"
-                    />
+                      className="w-full border-b border-black/10 py-3 text-xs font-bold uppercase tracking-widest outline-none focus:border-black transition-all bg-transparent"
+                    >
+                      <option value="" disabled>SELECT CATEGORY</option>
+                      {PRODUCT_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>{cat.toUpperCase()}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3 block">
+                      Gender
+                    </label>
+                    <div className="flex space-x-2">
+                      {GENDERS.map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, gender: g })}
+                          className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest border ${formData.gender === g ? 'bg-black text-white' : 'border-black/10 text-gray-400'}`}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div>
                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3 block">

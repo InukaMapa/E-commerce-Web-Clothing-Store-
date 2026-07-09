@@ -2,6 +2,7 @@ const User = require("../models/User");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Category = require("../models/Category");
+const CustomDesign = require("../models/CustomDesign");
 const XLSX = require("xlsx");
 
 // User Management
@@ -298,6 +299,35 @@ exports.getProductAnalytics = async (req, res) => {
             { $limit: 10 }
         ]);
         return res.status(200).json({ success: true, data: top });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// ── Slaughter Studio — Custom Design Submissions ──────────────────────────
+exports.getCustomDesigns = async (req, res) => {
+    try {
+        const designs = await CustomDesign.find()
+            .populate("user", "name email")
+            .sort({ createdAt: -1 });
+        return res.status(200).json({ success: true, data: designs });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.updateCustomDesignStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const design = await CustomDesign.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        ).populate("user", "name email");
+        if (!design) {
+            return res.status(404).json({ success: false, message: "Design not found" });
+        }
+        return res.status(200).json({ success: true, data: design });
     } catch (err) {
         return res.status(500).json({ success: false, message: err.message });
     }
