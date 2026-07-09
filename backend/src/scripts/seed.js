@@ -36,11 +36,16 @@ const seed = async () => {
       });
     }
 
-    // 2. Clear existing products (Optional - keep it for clean state)
-    await Product.deleteMany({});
-    console.log("Existing products cleared.");
+    // 2. Only seed products if the collection is empty (non-destructive)
+    const existingCount = await Product.countDocuments();
+    if (existingCount > 0) {
+      console.log(`Skipping product seed — ${existingCount} products already exist in the database.`);
+      await mongoose.disconnect();
+      process.exit(0);
+    }
 
-    // 3. Sample Products — Only standard categories: T-Shirt, Shirt, Jeans, Skirt, Frock
+    console.log("No products found. Seeding fresh products...");
+
     const products = [
       {
         name: "Classic Slate Tee",
@@ -55,6 +60,7 @@ const seed = async () => {
           { size: "XL", color: "Slate", stock: 30, sku: "TEE-SLT-XL" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Urban Graphic Tee",
@@ -68,6 +74,7 @@ const seed = async () => {
           { size: "L", color: "Black", stock: 20, sku: "TEE-GFX-L" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Oxford Button-Down Shirt",
@@ -83,6 +90,7 @@ const seed = async () => {
           { size: "L", color: "Blue", stock: 12, sku: "SHT-OXF-L-BLU" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Linen Summer Shirt",
@@ -96,6 +104,7 @@ const seed = async () => {
           { size: "L", color: "Beige", stock: 10, sku: "SHT-LNN-L" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Raw Denim Selvedge Jeans",
@@ -109,6 +118,7 @@ const seed = async () => {
           { size: "34", color: "Indigo", stock: 10, sku: "JNS-IND-34" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Slim Fit Black Jeans",
@@ -123,6 +133,7 @@ const seed = async () => {
           { size: "36", color: "Black", stock: 8, sku: "JNS-BLK-36" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Floral Midi Skirt",
@@ -137,6 +148,7 @@ const seed = async () => {
           { size: "L", color: "Rose", stock: 8, sku: "SKT-FLR-L" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Pleated Satin Skirt",
@@ -150,6 +162,7 @@ const seed = async () => {
           { size: "M", color: "Black", stock: 12, sku: "SKT-SAT-M" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Floral Wrap Frock",
@@ -164,6 +177,7 @@ const seed = async () => {
           { size: "L", color: "Floral", stock: 8, sku: "FRK-WRP-L" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
       {
         name: "Classic Black Frock",
@@ -178,6 +192,7 @@ const seed = async () => {
           { size: "L", color: "Black", stock: 6, sku: "FRK-BLK-L" },
         ],
         createdBy: admin._id,
+        status: "approved",
       },
     ];
 
