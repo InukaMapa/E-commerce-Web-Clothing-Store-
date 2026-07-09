@@ -211,7 +211,7 @@ export default function Shop() {
 
         <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
           <div className="flex flex-wrap items-center gap-2">
-            {['All', 'T-Shirt', 'Shirt', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map((filter) => (
+            {['All', 'T-Shirt', 'Shirt', 'Jeans', 'Skirt', 'Frock'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setSelectedCategory(filter)}
@@ -285,7 +285,7 @@ export default function Shop() {
               <div>
                 <h3 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-white/80">Categories</h3>
                 <ul className="space-y-4 text-[10px] uppercase tracking-widest font-medium">
-                  {['T-Shirt', 'Shirt', 'Jeans', 'Shoes', 'Caps', 'Backpacks', 'Wallets', 'Skirt', 'Frocks'].map(item => (
+                  {['T-Shirt', 'Shirt', 'Jeans', 'Skirt', 'Frock'].map(item => (
                     <li key={item}><a href="/cloth" className="hover:text-gray-400">{item}</a></li>
                   ))}
                 </ul>
