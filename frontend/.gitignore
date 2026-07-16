@@ -35,3 +35,19 @@ frontend/.env
 
 frontend/node_modules/
 backend/node_modules/
+
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment
+.env
+.env.*
+
+# Build files
+dist/
+build/
+
+# Logs
+npm-debug.log*
