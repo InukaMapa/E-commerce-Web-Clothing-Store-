@@ -13,6 +13,14 @@ const orderSchema = new mongoose.Schema({
     },
   ],
   totalAmount: Number,
+  shippingAddress: {
+    fullName: String,
+    address: String,
+    city: String,
+    zip: String,
+    phone: String,
+  },
+  paymentMethod: { type: String, default: "Card" },
   status: {
     type: String,
     enum: ["placed", "paid", "processing", "shipped", "completed", "cancelled"],

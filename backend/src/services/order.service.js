@@ -6,7 +6,7 @@ const auditService = require("../services/audit.service");
 // ---------------------------------------------------------------------------
 // Checkout — validate stock, deduct inventory, create order (atomic)
 // ---------------------------------------------------------------------------
-exports.checkout = async (userId, items) => {
+exports.checkout = async (userId, items, shippingAddress, paymentMethod) => {
   // ── 1. Group items by productId for batch lookup ────────────────────────
   const productIds = [...new Set(items.map((i) => i.productId))];
   const products = await Product.find({ _id: { $in: productIds } });
@@ -104,6 +104,8 @@ exports.checkout = async (userId, items) => {
     user: userId,
     items: orderItems,
     totalAmount: Math.round(totalAmount * 100) / 100,
+    shippingAddress,
+    paymentMethod: paymentMethod || "Card",
     status: "placed",
   });
 

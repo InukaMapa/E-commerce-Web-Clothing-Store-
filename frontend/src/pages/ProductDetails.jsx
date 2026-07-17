@@ -249,11 +249,11 @@ export default function ProductDetails() {
               <ul className="space-y-2 text-sm text-gray-500">
                 <li className="flex items-center">
                   <svg className="h-5 w-5 mr-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  <span>Free shipping on orders over $100</span>
+                  <span>Free shipping on orders over Rs. 20000</span>
                 </li>
                 <li className="flex items-center">
                   <svg className="h-5 w-5 mr-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                  <span>In-stock items ship within 24 hours</span>
+                  <span>Standard delivery within 3-5 business days</span>
                 </li>
               </ul>
             </div>
