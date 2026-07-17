@@ -27,6 +27,7 @@ app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/producer", require("./routes/producer.routes"));
 app.use("/api/upload", require("./routes/upload.routes"));
+app.use("/api/chat", require("./routes/chat.routes"));
 
 app.get("/", (req, res) => {
   res.send("API running...");

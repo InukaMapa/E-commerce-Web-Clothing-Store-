@@ -266,6 +266,29 @@ const AdminOrderManagement = () => {
                     </div>
                   </div>
 
+                  {/* Shipping & Payment Details */}
+                  {(order.shippingAddress || order.paymentMethod) && (
+                    <div className="mt-6 pt-6 border-t border-gray-50 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {order.shippingAddress && (
+                        <div>
+                          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Shipping Details</p>
+                          <div className="text-xs text-black font-medium">
+                            <p className="font-bold">{order.shippingAddress.fullName}</p>
+                            <p>{order.shippingAddress.address}</p>
+                            <p>{order.shippingAddress.city} {order.shippingAddress.zip}</p>
+                            <p className="mt-1">Phone: {order.shippingAddress.phone}</p>
+                          </div>
+                        </div>
+                      )}
+                      {order.paymentMethod && (
+                        <div>
+                          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Payment Method</p>
+                          <p className="text-xs font-bold text-black">{order.paymentMethod}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Status Actions */}
                   {NEXT_STATUSES[order.status]?.length > 0 && (
                     <div className="mt-6 flex items-center gap-3">

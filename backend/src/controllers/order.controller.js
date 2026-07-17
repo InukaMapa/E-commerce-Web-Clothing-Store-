@@ -6,13 +6,21 @@ const orderService = require("../services/order.service");
 // ---------------------------------------------------------------------------
 exports.checkout = async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items, shippingAddress, paymentMethod } = req.body;
 
     // ── Validation ────────────────────────────────────────────────────────
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Items array is required and must not be empty",
+        data: null,
+      });
+    }
+
+    if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.address) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipping address with fullName and address is required",
         data: null,
       });
     }
@@ -45,7 +53,7 @@ exports.checkout = async (req, res) => {
     }
 
     // ── Delegate to service ───────────────────────────────────────────────
-    const order = await orderService.checkout(req.user.id, items);
+    const order = await orderService.checkout(req.user.id, items, shippingAddress, paymentMethod);
 
     return res.status(201).json({
       success: true,

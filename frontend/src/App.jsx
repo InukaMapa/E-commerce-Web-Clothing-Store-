@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { CartProvider } from "./cart/CartContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import Navbar from "./components/Navbar";
+import Chatbot from "./components/Chatbot";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -17,6 +18,7 @@ import CustomizationInfo from "./pages/CustomizationInfo";
 import CustomizeCanvas from "./pages/CustomizeCanvas";
 import NotFound from "./pages/NotFound";
 import UserProfile from "./pages/UserProfile";
+import MyOrders from "./pages/MyOrders";
 
 // Admin Dashboard Pages
 import DashboardLayout from "./components/dashboard/DashboardLayout";
@@ -28,6 +30,7 @@ import AdminInventory from "./pages/admin/Inventory";
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminCategories from "./pages/admin/Categories";
 import SlaughterStudio from "./pages/admin/SlaughterStudio";
+import SupplierManagement from "./pages/admin/SupplierManagement";
 
 function AppContent() {
   const { user } = useAuth();
@@ -58,8 +61,17 @@ function AppContent() {
               <Route path="/customization-info" element={<CustomizationInfo />} />
               <Route path="/customize-canvas" element={<CustomizeCanvas />} />
               <Route path="/profile" element={<UserProfile />} />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute roles={["customer", "admin", "producer"]}>
+                    <MyOrders />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <Chatbot />
           </>
         }
       />
@@ -87,6 +99,7 @@ function AppContent() {
                 <Route path="orders" element={<AdminOrderManagement />} />
                 <Route path="inventory" element={<AdminInventory />} />
                 <Route path="categories" element={<AdminCategories />} />
+                <Route path="suppliers" element={<SupplierManagement />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="settings" element={<SlaughterStudio />} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />

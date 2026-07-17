@@ -101,6 +101,18 @@ export default function UserProfile() {
                   </div>
                 </button>
                 <button
+                  onClick={() => navigate("/orders")}
+                  className="flex items-center gap-3 px-5 py-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all text-left group"
+                >
+                  <svg className="w-5 h-5 text-gray-400 group-hover:text-black transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black">My Orders</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Track status</p>
+                  </div>
+                </button>
+                <button
                   onClick={() => navigate("/customization-info")}
                   className="flex items-center gap-3 px-5 py-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all text-left group"
                 >
