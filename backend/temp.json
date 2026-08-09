@@ -1,0 +1,63 @@
+[
+  {
+    "_id": "69a6e41a25c8fddef5eab204",
+    "user": "69a6e41725c8fddef5eab1f5",
+    "items": [
+      {
+        "productId": "69a6e41a25c8fddef5eab1fb",
+        "variantSku": "TSH-BLK-M-1772545047414",
+        "quantity": 2,
+        "price": 29.99,
+        "_id": "69a6e41a25c8fddef5eab205"
+      },
+      {
+        "productId": "69a6e41a25c8fddef5eab1fb",
+        "variantSku": "TSH-WHT-L-1772545047414",
+        "quantity": 1,
+        "price": 29.99,
+        "_id": "69a6e41a25c8fddef5eab206"
+      }
+    ],
+    "totalAmount": 89.97,
+    "status": "cancelled",
+    "createdAt": "2026-03-03T13:37:30.820Z",
+    "updatedAt": "2026-03-12T08:18:19.091Z",
+    "__v": 0
+  },
+  {
+    "_id": "69a7beed79d1b41567a07a65",
+    "user": "69a6ddc3d110f44ff73cee9e",
+    "items": [
+      {
+        "productId": "69a7b7e765abccfd2b07eb96",
+        "variantSku": "ACC-CAP-BLK",
+        "quantity": 1,
+        "price": 30,
+        "_id": "69a7beed79d1b41567a07a66"
+      }
+    ],
+    "totalAmount": 30,
+    "status": "cancelled",
+    "createdAt": "2026-03-04T05:11:09.386Z",
+    "updatedAt": "2026-03-12T08:18:17.843Z",
+    "__v": 0
+  },
+  {
+    "_id": "69af0437d9ad74647a864130",
+    "user": "69af042ed9ad74647a864120",
+    "items": [
+      {
+        "productId": "69a7b7e765abccfd2b07eb93",
+        "variantSku": "DEN-IND-32",
+        "quantity": 3,
+        "price": 145,
+        "_id": "69af0437d9ad74647a864131"
+      }
+    ],
+    "totalAmount": 435,
+    "status": "cancelled",
+    "createdAt": "2026-03-09T17:32:39.266Z",
+    "updatedAt": "2026-03-12T09:27:26.070Z",
+    "__v": 0
+  }
+]
