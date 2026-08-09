@@ -7,7 +7,7 @@ const SIZES      = ['S', 'M', 'L', 'XL', '2XL'];
 const COLORS     = ['white', 'black'];
 
 //Stability AI 
-const STABILITY_API_KEY = 'sk-Og9MM7ujVO57UP8RzlVfYgKNKr52qoUpqoWWxHvgUyIaSdpS';
+const STABILITY_API_KEY = 'sk-Io5SIHYqbvC4T4q11KpaZKyONIPxa5winCxS4aHwHsCFUy2k';
 
 async function fetchAIGeneratedImage(prompt) {
     const enhancedPrompt = `${prompt.trim()}, t-shirt graphic design, flat vector art, clean background, high quality, standalone`;
