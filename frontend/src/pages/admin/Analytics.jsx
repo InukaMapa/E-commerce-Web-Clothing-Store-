@@ -75,18 +75,33 @@ const KpiCard = ({ label, value, prefix = "", suffix = "", icon: Icon, trend, tr
   );
 };
 
-/* Custom Chart Tooltip */
+/* Custom Chart Tooltip for Line & Bar Charts */
 const ChartTooltip = ({ active, payload, label, prefix = "", suffix = "" }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-black text-white px-4 py-3 text-[10px] font-bold uppercase tracking-widest shadow-2xl border border-white/10">
-      <p className="text-white/40 mb-2 border-b border-white/10 pb-1">{label}</p>
+    <div className="bg-black text-white px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-widest shadow-xl border border-white/10 rounded-none z-50 pointer-events-none">
+      {label && <p className="text-white/40 mb-1.5 border-b border-white/10 pb-1 text-[9px]">{label}</p>}
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color || "#fff" }} className="flex justify-between gap-4">
+        <p key={i} style={{ color: p.color || "#fff" }} className="flex justify-between items-center gap-4">
           <span>{p.name}:</span>
-          <span>{prefix}{fmt(p.value)}{suffix}</span>
+          <span className="font-black">{prefix}{fmt(p.value)}{suffix}</span>
         </p>
       ))}
+    </div>
+  );
+};
+
+/* Custom Chart Tooltip for Pie Chart */
+const PieChartTooltip = ({ active, payload, prefix = "", suffix = "" }) => {
+  if (!active || !payload?.length) return null;
+  const data = payload[0];
+  if (!data) return null;
+  return (
+    <div className="bg-black text-white px-3 py-2 text-[10px] font-bold uppercase tracking-widest shadow-xl border border-white/10 rounded-none z-50 pointer-events-none">
+      <p style={{ color: data.color || "#fff" }} className="flex items-center gap-2">
+        <span>{data.name || "Apparel"}:</span>
+        <span className="font-black">{prefix}{fmt(data.value)}{suffix}</span>
+      </p>
     </div>
   );
 };
@@ -700,7 +715,6 @@ const AdminAnalytics = () => {
                                   <Cell key={i} fill={BRAND_PALETTE[i % BRAND_PALETTE.length]} />
                                 ))}
                               </Pie>
-                              <Tooltip content={<ChartTooltip prefix="Rs. " />} />
                               <Legend
                                 verticalAlign="bottom"
                                 height={36}
@@ -759,23 +773,16 @@ const AdminAnalytics = () => {
                                 <tr key={idx} className="hover:bg-gray-50 transition-colors">
                                   <td className="py-3 font-bold text-gray-400">#{idx + 1}</td>
                                   <td className="py-3 font-bold text-black flex items-center gap-2.5">
-                                    {imgUrl ? (
+                                    <div className="w-8 h-8 shrink-0 bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
                                       <img
-                                        src={imgUrl}
-                                        alt={prod.name}
-                                        className="w-8 h-8 object-cover border border-gray-200 shrink-0"
+                                        src={imgUrl || "https://images.unsplash.com/photo-1523381235212-d73f49380fbb?q=80&w=200&auto=format&fit=crop"}
+                                        alt=""
+                                        className="w-full h-full object-cover"
                                         onError={(e) => {
                                           e.target.onerror = null;
-                                          e.target.style.display = "none";
-                                          if (e.target.nextSibling) e.target.nextSibling.style.display = "flex";
+                                          e.target.src = "https://images.unsplash.com/photo-1523381235212-d73f49380fbb?q=80&w=200&auto=format&fit=crop";
                                         }}
                                       />
-                                    ) : null}
-                                    <div
-                                      className="w-8 h-8 bg-gray-100 border border-gray-200 flex items-center justify-center text-[8px] font-black text-gray-400 shrink-0"
-                                      style={{ display: imgUrl ? "none" : "flex" }}
-                                    >
-                                      {prod.name ? prod.name.substring(0, 2).toUpperCase() : "GAR"}
                                     </div>
                                     <span className="truncate max-w-[140px]">{prod.name}</span>
                                   </td>
