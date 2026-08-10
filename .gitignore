@@ -16,6 +16,20 @@ dist-ssr/
 .env.*
 !.env.example
 
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build files
+dist/
+dist-ssr/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
 # Logs
 logs/
 *.log
@@ -25,28 +39,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# =========================
-# Python
-# =========================
-venv/
-.venv/
-**/venv/
-**/.venv/
-
-__pycache__/
-**/__pycache__/
-*.py[cod]
-
-# =========================
-# IDE / Editor
-# =========================
-.vscode/
+# Editor directories and files
+.vscode/*
 !.vscode/extensions.json
 .idea/
-
-# =========================
-# OS
-# =========================
 .DS_Store
 Thumbs.db
 
@@ -59,3 +55,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Local files
+*.local

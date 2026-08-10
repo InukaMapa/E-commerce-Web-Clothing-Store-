@@ -25,6 +25,7 @@ app.use("/api/products", require("./routes/product.routes"));
 app.use("/api/orders", require("./routes/order.routes"));
 app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/admin", require("./routes/supplier.routes"));
 app.use("/api/producer", require("./routes/producer.routes"));
 app.use("/api/upload", require("./routes/upload.routes"));
 app.use("/api/chat", require("./routes/chat.routes"));
