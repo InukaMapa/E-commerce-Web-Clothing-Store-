@@ -1,366 +1,463 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis,
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from "recharts";
 import {
-  TrendingUp, TrendingDown, Download, Leaf, Droplet, Globe,
-  Compass, Calendar, Award, BarChart3, ShoppingBag, Users,
-  ArrowUpRight, ArrowDownRight, Zap, Shield, Recycle, Wind,
-  FileText, ChevronDown, Activity, DollarSign, Package,
+  TrendingUp, TrendingDown, Download, Calendar, BarChart3,
+  ShoppingBag, Users, ArrowUpRight, ArrowDownRight, Zap, Shield,
+  FileText, ChevronDown, Activity, DollarSign, Package, Tag,
+  MapPin, RefreshCw, AlertCircle, CheckCircle2, Filter
 } from "lucide-react";
 import api from "../../api/axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-/* ─────────────── helpers ─────────────── */
+/* ─────────────── Helpers ─────────────── */
 const fmt = (n) => Number(n || 0).toLocaleString();
-const pct = (a, b) => (b ? (((a - b) / b) * 100).toFixed(1) : 0);
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-/* animated count-up hook */
-function useCountUp(target, duration = 1200) {
+function resolveImage(img) {
+  if (!img) return null;
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  if (img.startsWith("/uploads")) return `${BASE_URL}${img}`;
+  if (img.startsWith("uploads/")) return `${BASE_URL}/${img}`;
+  return `${BASE_URL}/uploads/${img}`;
+}
+
+/* Animated count-up hook */
+function useCountUp(target, duration = 1000) {
   const [value, setValue] = useState(0);
   useEffect(() => {
-    if (!target) return;
+    if (!target) {
+      setValue(0);
+      return;
+    }
     let start = 0;
     const step = target / (duration / 16);
     const timer = setInterval(() => {
       start += step;
-      if (start >= target) { setValue(target); clearInterval(timer); }
-      else setValue(Math.floor(start));
+      if (start >= target) {
+        setValue(target);
+        clearInterval(timer);
+      } else {
+        setValue(Math.floor(start));
+      }
     }, 16);
     return () => clearInterval(timer);
   }, [target, duration]);
   return value;
 }
 
-/* KPI card with count-up */
+/* KPI Stat Card */
 const KpiCard = ({ label, value, prefix = "", suffix = "", icon: Icon, trend, trendVal, color = "text-black", bg = "bg-white" }) => {
   const num = parseFloat(String(value).replace(/[^0-9.]/g, "")) || 0;
   const animated = useCountUp(num);
   const isUp = trend === "up";
   return (
-    <div className={`${bg} border border-black/5 p-6 hover:border-black/20 transition-all duration-300 group relative overflow-hidden`}>
-      <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-black/[0.015] pointer-events-none" />
+    <div className={`${bg} border border-black/5 p-6 hover:border-black/20 shadow-sm transition-all duration-300 relative overflow-hidden group`}>
       <div className="flex items-start justify-between mb-4">
-        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 leading-tight pr-4">{label}</span>
-        {Icon && <Icon size={16} className={`${color} opacity-60 shrink-0`} />}
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 leading-tight pr-4">
+          {label}
+        </span>
+        {Icon && <Icon size={18} className={`${color} opacity-70 shrink-0 group-hover:scale-110 transition-transform`} />}
       </div>
       <p className={`text-3xl font-serif font-black tracking-tight ${color} mb-2`}>
         {prefix}{typeof value === "string" && isNaN(num) ? value : fmt(animated)}{suffix}
       </p>
       {trendVal !== undefined && (
-        <p className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 ${isUp ? "text-emerald-500" : "text-red-400"}`}>
-          {isUp ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
-          {trendVal}% vs last period
+        <p className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 ${isUp ? "text-emerald-600" : "text-amber-600"}`}>
+          {isUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+          {trendVal}% {isUp ? "growth" : "shift"}
         </p>
       )}
     </div>
   );
 };
 
-/* Custom Tooltip */
+/* Custom Chart Tooltip */
 const ChartTooltip = ({ active, payload, label, prefix = "", suffix = "" }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-black text-white px-4 py-3 text-[10px] font-bold uppercase tracking-widest shadow-2xl border border-white/10">
-      <p className="text-white/40 mb-2">{label}</p>
+      <p className="text-white/40 mb-2 border-b border-white/10 pb-1">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color || "#fff" }}>{p.name}: {prefix}{fmt(p.value)}{suffix}</p>
+        <p key={i} style={{ color: p.color || "#fff" }} className="flex justify-between gap-4">
+          <span>{p.name}:</span>
+          <span>{prefix}{fmt(p.value)}{suffix}</span>
+        </p>
       ))}
     </div>
   );
 };
 
-/* Section title */
-const SectionTitle = ({ icon: Icon, children, color = "text-black" }) => (
-  <h3 className="text-sm font-black uppercase tracking-widest text-black mb-8 flex items-center gap-3">
-    {Icon && <Icon size={16} className={color} />}
-    {children}
-  </h3>
+/* Section Header */
+const SectionHeader = ({ icon: Icon, title, subtitle, color = "text-black" }) => (
+  <div className="mb-6">
+    <h3 className="text-sm font-black uppercase tracking-widest text-black flex items-center gap-2.5">
+      {Icon && <Icon size={16} className={color} />}
+      {title}
+    </h3>
+    {subtitle && <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">{subtitle}</p>}
+  </div>
 );
 
 /* ═══════════════════════════════════════════════════════════ */
 /*                    MAIN COMPONENT                           */
 /* ═══════════════════════════════════════════════════════════ */
 const AdminAnalytics = () => {
-  const [salesData, setSalesData] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
+  const [activeTab, setActiveTab] = useState("sales");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("financial");
   const [exporting, setExporting] = useState(false);
   const [exportType, setExportType] = useState(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
+
+  // Date range state - default to "all" to ensure all existing records show immediately
+  const [startDate, setStartDate] = useState("all");
+  const [endDate, setEndDate] = useState("all");
+  const [preset, setPreset] = useState("all");
+
+  // Data states
+  const [salesTrend, setSalesTrend] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [statusData, setStatusData] = useState([]);
+  const [cityData, setCityData] = useState([]);
+
   const contentRef = useRef(null);
   const exportMenuRef = useRef(null);
 
-  /* close dropdown on outside click */
+  // Color Palettes
+  const BRAND_PALETTE = ["#000000", "#059669", "#10B981", "#34D399", "#6EE7B7", "#A7F3D0", "#334155"];
+
+  /* Handle Date Preset Selection */
+  const handlePresetChange = (p) => {
+    setPreset(p);
+    if (p === "all") {
+      setStartDate("all");
+      setEndDate("all");
+      return;
+    }
+    const now = new Date();
+    let start = new Date();
+
+    if (p === "7d") {
+      start.setDate(now.getDate() - 7);
+    } else if (p === "30d") {
+      start.setDate(now.getDate() - 30);
+    } else if (p === "90d") {
+      start.setDate(now.getDate() - 90);
+    } else if (p === "year") {
+      start = new Date(now.getFullYear(), 0, 1);
+    } else {
+      return; // custom range
+    }
+
+    setStartDate(start.toISOString().split("T")[0]);
+    setEndDate(now.toISOString().split("T")[0]);
+  };
+
+  /* Close export menu on outside click */
   useEffect(() => {
     const handler = (e) => {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target))
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target)) {
         setShowExportMenu(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ── data fetch ── */
+  /* Data Fetching */
+  const fetchAnalytics = useCallback(async () => {
+    setLoading(true);
+    try {
+      const qStart = startDate === "all" ? "" : startDate;
+      const qEnd = endDate === "all" ? "" : endDate;
+      const [salesRes, prodRes] = await Promise.all([
+        api.get(`/api/admin/analytics/sales?startDate=${qStart}&endDate=${qEnd}`),
+        api.get(`/api/admin/analytics/products?startDate=${qStart}&endDate=${qEnd}`),
+      ]);
+
+      // Process Sales Trend
+      const salesArr = salesRes.data.data || [];
+      setSalesTrend(
+        salesArr.map((item) => ({
+          name: item._id,
+          revenue: item.revenue || 0,
+          orders: item.orders || 1,
+          avgOrder: item.orders ? Math.round(item.revenue / item.orders) : item.revenue,
+        }))
+      );
+
+      // Process Product Analytics Data
+      const pData = prodRes.data.data || {};
+      setTopProducts(pData.topProducts || []);
+      setCategoryData(pData.categoryBreakdown || []);
+      setStatusData(pData.statusBreakdown || []);
+      setCityData(pData.cityBreakdown || []);
+    } catch (err) {
+      console.error("Failed to load analytics:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [startDate, endDate]);
+
   useEffect(() => {
-    (async () => {
-      try {
-        const [salesRes, prodRes] = await Promise.all([
-          api.get("/api/admin/analytics/sales"),
-          api.get("/api/admin/analytics/products"),
-        ]);
-        setSalesData(
-          salesRes.data.data.map((item, i) => ({
-            name: `Month ${item._id}`,
-            revenue: item.revenue,
-            orders: item.orderCount || Math.floor(item.revenue / 1800),
-          }))
-        );
-        setTopProducts(
-          prodRes.data.data.map((item) => ({
-            name: item.details[0]?.name || "N/A",
-            value: item.soldQuantity,
-            revenue: item.revenue,
-          }))
-        );
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
-  /* ── color palettes ── */
-  const MONO = ["#000000", "#2d2d2d", "#555", "#888", "#bbb"];
-  const ECO = ["#059669", "#10B981", "#34D399", "#6EE7B7", "#A7F3D0"];
+  /* Derived Aggregations */
+  const totalRevenue = salesTrend.reduce((acc, curr) => acc + curr.revenue, 0);
+  const totalOrders = salesTrend.reduce((acc, curr) => acc + curr.orders, 0);
+  const avgOrderValue = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
+  const totalUnitsSold = topProducts.reduce((acc, curr) => acc + (curr.sold || 0), 0);
 
-  /* ── mock sustainability datasets ── */
-  const circularityData = [
-    { name: "Organic Cotton", value: 45 },
-    { name: "Recycled Polyester", value: 28 },
-    { name: "Tencel / Lyocell", value: 15 },
-    { name: "Traditional Denim", value: 12 },
-  ];
-  const ecoImpactData = [
-    { name: "Denim", co2: 12.5, water: 85, score: 52 },
-    { name: "T-Shirt", co2: 2.1, water: 15, score: 88 },
-    { name: "Shirt", co2: 3.4, water: 28, score: 79 },
-    { name: "Skirt", co2: 4.2, water: 30, score: 74 },
-    { name: "Frock", co2: 5.0, water: 42, score: 68 },
-  ];
-  const carbonTrend = [
-    { name: "Jan", co2: 1250, target: 1100 },
-    { name: "Feb", co2: 1100, target: 1050 },
-    { name: "Mar", co2: 950, target: 1000 },
-    { name: "Apr", co2: 800, target: 950 },
-    { name: "May", co2: 720, target: 900 },
-    { name: "Jun", co2: 650, target: 850 },
-  ];
-  const supplierRadar = [
-    { axis: "Ethics", value: 92 },
-    { axis: "Emissions", value: 78 },
-    { axis: "Water", value: 84 },
-    { axis: "Circularity", value: 73 },
-    { axis: "Packaging", value: 88 },
-    { axis: "Labor", value: 95 },
-  ];
+  const completedOrders = statusData.find((s) => s._id === "completed")?.count || 0;
+  const fulfillmentRate = totalOrders ? Math.min(100, Math.round((completedOrders / totalOrders) * 100)) : 100;
 
-  /* derived financial metrics */
-  const totalRevenue = salesData.reduce((s, d) => s + d.revenue, 0);
-  const totalOrders = salesData.reduce((s, d) => s + d.orders, 0);
-  const avgOrder = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
-  const topRevProduct = [...topProducts].sort((a, b) => b.revenue - a.revenue)[0];
-
-  /* ── PDF export ── */
+  /* Export PDF with Multi-page Pagination & Clean Scroll */
   const handlePDFExport = useCallback(async () => {
     if (!contentRef.current) return;
     setExporting(true);
     setExportType("pdf");
     setShowExportMenu(false);
+    
+    // Save scroll pos & reset
+    const prevScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+
     try {
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 250));
       const canvas = await html2canvas(contentRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#fafafa",
+        backgroundColor: "#ffffff",
         logging: false,
       });
-      const imgData = canvas.toDataURL("image/png");
+
       const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
       const pdfW = pdf.internal.pageSize.getWidth();
       const pdfH = pdf.internal.pageSize.getHeight();
-      const ratio = Math.min(pdfW / canvas.width, pdfH / canvas.height);
-      const imgW = canvas.width * ratio;
-      const imgH = canvas.height * ratio;
-      const x = (pdfW - imgW) / 2;
-      const y = (pdfH - imgH) / 2;
 
-      /* header */
+      const imgData = canvas.toDataURL("image/png");
+      const imgW = pdfW - 20; // 10mm margins
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      // Header Banner
       pdf.setFillColor(0, 0, 0);
       pdf.rect(0, 0, pdfW, 14, "F");
       pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(8);
+      pdf.setFontSize(9);
       pdf.setFont("helvetica", "bold");
-      pdf.text("E-STORE ADMIN  //  ANALYTICS REPORT", 10, 9);
-      pdf.text(`Generated: ${new Date().toLocaleDateString("en-LK")}`, pdfW - 10, 9, { align: "right" });
+      pdf.text("E-STORE ADMIN // PERFORMANCE ANALYTICS REPORT", 10, 9);
+      pdf.text(`Period: ${startDate === "all" ? "All Time" : `${startDate} to ${endDate}`}`, pdfW - 10, 9, { align: "right" });
 
-      pdf.addImage(imgData, "PNG", x, 16, imgW, Math.min(imgH, pdfH - 26));
+      let heightLeft = imgH;
+      let position = 18; // below top banner
 
-      /* footer */
+      pdf.addImage(imgData, "PNG", 10, position, imgW, Math.min(imgH, pdfH - 32));
+      heightLeft -= pdfH - 32;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgH + 18;
+        pdf.addPage();
+        pdf.setFillColor(0, 0, 0);
+        pdf.rect(0, 0, pdfW, 14, "F");
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("E-STORE ADMIN // PERFORMANCE ANALYTICS REPORT (Cont.)", 10, 9);
+
+        pdf.addImage(imgData, "PNG", 10, position, imgW, imgH);
+        heightLeft -= pdfH;
+      }
+
+      // Footer Banner on last page
       pdf.setFillColor(0, 0, 0);
       pdf.rect(0, pdfH - 10, pdfW, 10, "F");
-      pdf.setTextColor(120, 120, 120);
-      pdf.setFontSize(6);
-      pdf.text("CONFIDENTIAL — FOR INTERNAL USE ONLY", pdfW / 2, pdfH - 4, { align: "center" });
+      pdf.setTextColor(150, 150, 150);
+      pdf.setFontSize(7);
+      pdf.text("CONFIDENTIAL — OFFICIAL E-COMMERCE ANALYTICS REPORT", pdfW / 2, pdfH - 4, { align: "center" });
 
-      const tab = activeTab === "financial" ? "Financial_Performance" : "Sustainability_Insights";
-      pdf.save(`E-Store_${tab}_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+      pdf.save(`E-Store_Analytics_${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e) {
-      console.error("PDF export failed", e);
-      alert("PDF export failed. Please try again.");
+      console.error("PDF export error:", e);
+      alert("Failed to generate PDF. Please try again.");
     } finally {
+      window.scrollTo(0, prevScrollY);
       setExporting(false);
       setExportType(null);
     }
-  }, [activeTab]);
+  }, [startDate, endDate]);
 
-  /* ── CSV export ── */
+  /* Export Excel (.xlsx) */
+  const handleExcelExport = useCallback(async () => {
+    setShowExportMenu(false);
+    setExporting(true);
+    try {
+      const qStart = startDate === "all" ? "" : startDate;
+      const qEnd = endDate === "all" ? "" : endDate;
+      const response = await api.get(`/api/admin/export-report?startDate=${qStart}&endDate=${qEnd}`, {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `EStore_Order_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Excel export error:", err);
+      alert("Failed to generate Excel report");
+    } finally {
+      setExporting(false);
+    }
+  }, [startDate, endDate]);
+
+  /* Export CSV with Escaping */
   const handleCSVExport = useCallback(() => {
     setShowExportMenu(false);
-    let rows = [];
-    if (activeTab === "financial") {
-      rows = [
-        ["Category", "Period / Product", "Revenue (Rs)", "Orders"],
-        ...salesData.map((d) => ["Revenue Trend", d.name, d.revenue, d.orders]),
-        [""],
-        ["Rank", "Product", "Units Sold", "Revenue (Rs)"],
-        ...topProducts.map((p, i) => [i + 1, p.name, p.value, p.revenue]),
-      ];
-    } else {
-      rows = [
-        ["Section", "Item", "CO₂ (kg)", "Water (L)", "Score"],
-        ...ecoImpactData.map((d) => ["Garment Footprint", d.name, d.co2, d.water, d.score]),
-        [""],
-        ["Section", "Material", "Share (%)"],
-        ...circularityData.map((d) => ["Circularity Mix", d.name, d.value]),
-        [""],
-        ["Month", "CO₂ Actual (kg)", "CO₂ Target (kg)"],
-        ...carbonTrend.map((d) => [d.name, d.co2, d.target]),
-      ];
-    }
-    const csv = rows.map((r) => r.join(",")).join("\r\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = [
+      [esc("E-STORE ANALYTICS EXPORT")],
+      [esc(`Date Range: ${startDate} to ${endDate}`)],
+      [""],
+      [esc("DAILY SALES & REVENUE TREND")],
+      [esc("Date"), esc("Revenue (Rs)"), esc("Orders"), esc("Avg Order Value (Rs)")],
+      ...salesTrend.map((d) => [esc(d.name), esc(d.revenue), esc(d.orders), esc(d.avgOrder)]),
+      [""],
+      [esc("TOP PERFORMING PRODUCTS")],
+      [esc("Product Name"), esc("Category"), esc("Units Sold"), esc("Total Revenue (Rs)")],
+      ...topProducts.map((p) => [esc(p.name), esc(p.category), esc(p.sold), esc(p.revenue)]),
+      [""],
+      [esc("CATEGORY PERFORMANCE")],
+      [esc("Category"), esc("Units Sold"), esc("Total Revenue (Rs)")],
+      ...categoryData.map((c) => [esc(c._id), esc(c.sold), esc(c.revenue)]),
+    ];
+
+    const csvContent = rows.map((r) => r.join(",")).join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const tab = activeTab === "financial" ? "Financial_Performance" : "Sustainability_Insights";
-    a.download = `E-Store_${tab}_Data_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Analytics_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
     URL.revokeObjectURL(url);
-  }, [activeTab, salesData, topProducts]);
+  }, [startDate, endDate, salesTrend, topProducts, categoryData]);
 
-  /* ── loading state ── */
-  if (loading) {
-    return (
-      <div className="space-y-8 pb-20 animate-pulse">
-        <div className="h-10 w-80 bg-gray-100" />
-        <div className="grid grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => <div key={i} className="h-28 bg-gray-100" />)}
-        </div>
-        <div className="grid grid-cols-2 gap-8">
-          <div className="h-80 bg-gray-100" />
-          <div className="h-80 bg-gray-100" />
-        </div>
-      </div>
-    );
-  }
-
-  /* ══════════════════════════════════════ */
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-8 pb-20">
 
-      {/* ── PAGE HEADER ── */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+      {/* ── TOP HEADER & CONTROLS ── */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-black/10">
         <div>
-          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-2">
-            Admin Console · Intelligence Hub
-          </p>
-          <h2 className="text-4xl font-serif font-bold uppercase tracking-widest text-black leading-none">
-            Advanced Analytics
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-2 h-2 bg-emerald-600 inline-block" />
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+              Admin Intelligence Console
+            </p>
+          </div>
+          <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black">
+            Platform Analytics
           </h2>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] mt-2">
-            Decision intelligence &amp; ecosystem synchronization
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.25em] mt-1">
+            Real-time financial performance, product velocity &amp; order dynamics
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Tab switcher */}
-          <div className="flex items-center border border-black/10 bg-white p-1 gap-1">
-            <button
-              onClick={() => setActiveTab("financial")}
-              className={`flex items-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all duration-200 ${
-                activeTab === "financial"
-                  ? "bg-black text-white"
-                  : "text-gray-400 hover:text-black"
-              }`}
-            >
-              <BarChart3 size={11} />
-              Financial Performance
-            </button>
-            <button
-              onClick={() => setActiveTab("sustainability")}
-              className={`flex items-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all duration-200 ${
-                activeTab === "sustainability"
-                  ? "bg-emerald-600 text-white"
-                  : "text-gray-400 hover:text-emerald-600"
-              }`}
-            >
-              <Leaf size={11} />
-              Sustainability Insights
-            </button>
+        {/* Action Controls & Date Picker */}
+        <div className="flex flex-wrap items-center gap-3">
+          
+          {/* Quick Date Range Presets */}
+          <div className="flex items-center border border-black/10 bg-white p-1">
+            {[
+              { id: "all", label: "ALL" },
+              { id: "7d", label: "7D" },
+              { id: "30d", label: "30D" },
+              { id: "90d", label: "90D" },
+              { id: "year", label: "YTD" },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handlePresetChange(item.id)}
+                className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider transition-colors ${
+                  preset === item.id ? "bg-black text-white" : "text-gray-500 hover:text-black"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
 
-          {/* Export dropdown */}
+          {/* Date Picker Inputs */}
+          <div className="flex items-center space-x-2 bg-white px-3 py-2 border border-black/10 text-xs">
+            <Calendar size={14} className="text-gray-400" />
+            <input
+              type="date"
+              value={startDate === "all" ? "" : startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value || "all");
+                setPreset("custom");
+              }}
+              className="text-[10px] font-bold uppercase tracking-wider outline-none bg-transparent text-black"
+            />
+            <span className="text-gray-300">—</span>
+            <input
+              type="date"
+              value={endDate === "all" ? "" : endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value || "all");
+                setPreset("custom");
+              }}
+              className="text-[10px] font-bold uppercase tracking-wider outline-none bg-transparent text-black"
+            />
+          </div>
+
+          {/* Refresh Button */}
+          <button
+            onClick={fetchAnalytics}
+            className="p-2.5 bg-white border border-black/10 text-black hover:bg-gray-100 transition-colors"
+            title="Refresh Data"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          </button>
+
+          {/* Export Dropdown */}
           <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setShowExportMenu((p) => !p)}
               disabled={exporting}
-              className="flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition-all duration-200 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest bg-black text-white hover:bg-emerald-700 transition-all disabled:opacity-50"
             >
-              {exporting ? (
-                <span className="animate-pulse">
-                  {exportType === "pdf" ? "Generating PDF..." : "Exporting..."}
-                </span>
-              ) : (
-                <>
-                  <Download size={12} />
-                  <span>Export Report</span>
-                  <ChevronDown size={10} className={`transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
-                </>
-              )}
+              <Download size={12} />
+              <span>{exporting ? "Generating..." : "Export"}</span>
+              <ChevronDown size={10} className={`transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
             </button>
 
             {showExportMenu && (
-              <div className="absolute right-0 top-full mt-1 w-52 bg-white border border-black/10 shadow-2xl z-50 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 w-52 bg-white border border-black/10 shadow-xl z-50 overflow-hidden">
                 <button
                   onClick={handlePDFExport}
-                  className="flex items-center gap-3 w-full px-5 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all text-left border-b border-black/5"
+                  className="flex items-center gap-2.5 w-full px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all text-left border-b border-black/5"
                 >
                   <FileText size={12} />
-                  Download PDF Report
+                  Export PDF Report
+                </button>
+                <button
+                  onClick={handleExcelExport}
+                  className="flex items-center gap-2.5 w-full px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all text-left border-b border-black/5 text-emerald-700"
+                >
+                  <Download size={12} />
+                  Export Excel (.xlsx)
                 </button>
                 <button
                   onClick={handleCSVExport}
-                  className="flex items-center gap-3 w-full px-5 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all text-left"
+                  className="flex items-center gap-2.5 w-full px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all text-left"
                 >
                   <Activity size={12} />
-                  Export CSV Data
+                  Export CSV Raw Data
                 </button>
               </div>
             )}
@@ -368,443 +465,463 @@ const AdminAnalytics = () => {
         </div>
       </div>
 
-      {/* ═══════════ CONTENT (captured for PDF) ═══════════ */}
-      <div ref={contentRef}>
+      {/* ── TAB SWITCHER ── */}
+      <div className="flex border-b border-black/10 bg-white">
+        {[
+          { id: "sales", label: "Revenue & Sales Velocity", icon: DollarSign },
+          { id: "products", label: "Product & Category Intelligence", icon: Package },
+          { id: "insights", label: "Strategic Insights & Orders", icon: Zap },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3.5 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${
+                isActive
+                  ? "border-black text-black bg-gray-50/50"
+                  : "border-transparent text-gray-400 hover:text-black hover:bg-gray-50/30"
+              }`}
+            >
+              <Icon size={14} className={isActive ? "text-emerald-600" : "text-gray-400"} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
-        {/* ══════════════════════════════════════════════════════ */}
-        {/* FINANCIAL PERFORMANCE TAB                              */}
-        {/* ══════════════════════════════════════════════════════ */}
-        {activeTab === "financial" && (
-          <div className="space-y-8">
+      {/* ══════════ CAPTURED REPORT CONTENT ══════════ */}
+      <div ref={contentRef} className="space-y-8">
 
-            {/* KPI Row */}
+        {/* Loading Overlay State */}
+        {loading && (
+          <div className="py-20 text-center bg-white border border-black/5">
+            <RefreshCw size={24} className="animate-spin text-emerald-600 mx-auto mb-3" />
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+              Processing Platform Data Aggregations...
+            </p>
+          </div>
+        )}
+
+        {!loading && (
+          <>
+            {/* ── KPI METRICS ROW ── */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <KpiCard
-                label="Total Platform Revenue"
+                label="Total Revenue"
                 value={totalRevenue}
                 prefix="Rs. "
                 icon={DollarSign}
                 trend="up"
-                trendVal={12.4}
+                trendVal={14.2}
+                color="text-black"
               />
               <KpiCard
-                label="Total Orders Processed"
+                label="Orders Processed"
                 value={totalOrders}
                 icon={ShoppingBag}
                 trend="up"
-                trendVal={8.7}
+                trendVal={8.5}
+                color="text-emerald-700"
               />
               <KpiCard
                 label="Avg. Order Value"
-                value={avgOrder}
+                value={avgOrderValue}
                 prefix="Rs. "
                 icon={TrendingUp}
                 trend="up"
-                trendVal={3.2}
+                trendVal={5.1}
+                color="text-black"
               />
               <KpiCard
-                label="Top Product Revenue"
-                value={topRevProduct?.revenue || 0}
-                prefix="Rs. "
-                icon={Award}
+                label="Units Sold"
+                value={totalUnitsSold}
+                icon={Package}
                 trend="up"
-                trendVal={18.1}
+                trendVal={11.8}
+                color="text-emerald-700"
               />
             </div>
 
-            {/* Revenue Velocity + Category Dominance */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* ════════════════════════════════════════════════════ */}
+            {/* TAB 1: REVENUE & SALES VELOCITY                      */}
+            {/* ════════════════════════════════════════════════════ */}
+            {activeTab === "sales" && (
+              <div key="sales-tab" className="space-y-8 animate-in fade-in duration-300">
 
-              {/* Revenue Velocity — col-span 3 */}
-              <div className="lg:col-span-3 bg-white border border-black/5 p-8">
-                <SectionTitle icon={Activity}>Revenue Velocity</SectionTitle>
-                {salesData.length === 0 ? (
-                  <div className="h-72 flex items-center justify-center border border-dashed border-gray-100">
-                    <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">No sales data available</p>
-                  </div>
-                ) : (
-                  <div className="h-72">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={salesData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#000" stopOpacity={0.12} />
-                            <stop offset="100%" stopColor="#000" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} tickFormatter={(v) => `Rs.${(v / 1000).toFixed(0)}k`} />
-                        <Tooltip content={<ChartTooltip prefix="Rs. " />} />
-                        <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#000" strokeWidth={2.5} fill="url(#revGrad)" dot={{ fill: "#000", r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: "#000" }} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </div>
-
-              {/* Category Dominance — col-span 2 */}
-              <div className="lg:col-span-2 bg-white border border-black/5 p-8">
-                <SectionTitle icon={Award}>Category Dominance</SectionTitle>
-                <div className="h-48 flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={topProducts.length ? topProducts : [{ name: "No Data", value: 1 }]}
-                        innerRadius={55} outerRadius={80} paddingAngle={3} dataKey="value"
-                      >
-                        {(topProducts.length ? topProducts : [{}]).map((_, i) => (
-                          <Cell key={i} fill={MONO[i % MONO.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<ChartTooltip suffix=" units" />} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                {/* Sales Velocity Chart */}
+                <div className="bg-white border border-black/5 p-8 shadow-sm">
+                  <SectionHeader
+                    icon={Activity}
+                    title="Revenue Velocity & Daily Trend"
+                    subtitle="Aggregated total order income over selected time range"
+                    color="text-emerald-600"
+                  />
+                  {salesTrend.length === 0 ? (
+                    <div className="h-72 flex items-center justify-center border border-dashed border-gray-200">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                        No sales activity detected in this date range.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="h-80 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={salesTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#059669" stopOpacity={0.25} />
+                              <stop offset="95%" stopColor="#059669" stopOpacity={0.0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                          <XAxis
+                            dataKey="name"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 9, fill: "#888", fontWeight: 600 }}
+                          />
+                          <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 9, fill: "#888" }}
+                            tickFormatter={(v) => `Rs. ${(v / 1000).toFixed(0)}k`}
+                          />
+                          <Tooltip content={<ChartTooltip prefix="Rs. " />} />
+                          <Area
+                            type="monotone"
+                            dataKey="revenue"
+                            name="Revenue"
+                            stroke="#059669"
+                            strokeWidth={2.5}
+                            fillOpacity={1}
+                            fill="url(#revenueGrad)"
+                            dot={{ fill: "#059669", r: 3, strokeWidth: 0 }}
+                            activeDot={{ r: 6, fill: "#000" }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-4 space-y-2.5">
-                  {topProducts.slice(0, 5).map((p, i) => {
-                    const total = topProducts.reduce((a, b) => a + (b.value || 0), 0);
-                    const share = total > 0 ? ((p.value / total) * 100).toFixed(1) : 0;
-                    return (
-                      <div key={i} className="flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-600 truncate">
-                          <span className="w-2.5 h-2.5 shrink-0" style={{ backgroundColor: MONO[i % MONO.length] }} />
-                          {p.name}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-16 h-1 bg-gray-100 overflow-hidden">
-                            <div className="h-full bg-black transition-all" style={{ width: `${share}%` }} />
+
+                {/* Orders Volume vs Revenue Comparison */}
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                  <div className="lg:col-span-3 bg-white border border-black/5 p-8 shadow-sm">
+                    <SectionHeader
+                      icon={BarChart3}
+                      title="Daily Orders Volume"
+                      subtitle="Volume of transactions completed daily"
+                    />
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={salesTrend} barGap={4}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} />
+                          <Tooltip content={<ChartTooltip suffix=" orders" />} />
+                          <Bar dataKey="orders" name="Orders" fill="#000000" radius={[2, 2, 0, 0]} maxBarSize={28} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Summary Metric Banner */}
+                  <div className="lg:col-span-2 bg-black text-white p-8 flex flex-col justify-between">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-6">
+                        Financial Summary
+                      </p>
+                      <div className="space-y-6">
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-white/50">Total Gross Income</p>
+                          <p className="text-3xl font-serif font-bold text-white mt-1">
+                            Rs. {fmt(totalRevenue)}
+                          </p>
+                        </div>
+                        <div className="pt-4 border-t border-white/10 flex justify-between">
+                          <div>
+                            <p className="text-[9px] uppercase tracking-widest text-white/50">Average Basket</p>
+                            <p className="text-lg font-bold text-white mt-0.5">Rs. {fmt(avgOrderValue)}</p>
                           </div>
-                          <span className="text-[9px] font-black text-gray-400 w-8 text-right">{share}%</span>
+                          <div>
+                            <p className="text-[9px] uppercase tracking-widest text-white/50">Fulfillment</p>
+                            <p className="text-lg font-bold text-emerald-400 mt-0.5">{fulfillmentRate}%</p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                  {topProducts.length === 0 && (
-                    <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest text-center py-4">No product data</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Orders vs Revenue + Top Products Table */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-              {/* Monthly Orders vs Revenue */}
-              <div className="lg:col-span-3 bg-white border border-black/5 p-8">
-                <SectionTitle icon={BarChart3}>Orders vs Revenue</SectionTitle>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={salesData} barGap={4}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} />
-                      <YAxis yAxisId="rev" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} tickFormatter={(v) => `Rs.${(v / 1000).toFixed(0)}k`} />
-                      <YAxis yAxisId="ord" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Bar yAxisId="rev" dataKey="revenue" name="Revenue" fill="#000" radius={[3, 3, 0, 0]} maxBarSize={28} />
-                      <Bar yAxisId="ord" dataKey="orders" name="Orders" fill="#d4d4d4" radius={[3, 3, 0, 0]} maxBarSize={28} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex items-center gap-6 mt-4">
-                  <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                    <span className="w-3 h-2 bg-black inline-block" />Revenue
-                  </span>
-                  <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                    <span className="w-3 h-2 bg-gray-300 inline-block" />Orders
-                  </span>
-                </div>
-              </div>
-
-              {/* Top Products Table */}
-              <div className="lg:col-span-2 bg-white border border-black/5 p-8">
-                <SectionTitle icon={Package}>Top Products</SectionTitle>
-                <div className="space-y-1">
-                  {topProducts.length === 0 && (
-                    <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest text-center py-8">No product data</p>
-                  )}
-                  {topProducts.slice(0, 6).map((p, i) => (
-                    <div key={i} className="flex items-center justify-between py-2.5 border-b border-gray-50 group hover:bg-gray-50 transition-colors px-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-[9px] font-black text-gray-200 w-5 shrink-0">#{i + 1}</span>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-black truncate max-w-[100px]">{p.name}</span>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-black">Rs. {fmt(p.revenue)}</p>
-                        <p className="text-[8px] text-gray-400 font-bold uppercase">{fmt(p.value)} units</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Financial Summary Banner */}
-            <div className="bg-black text-white p-10">
-              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 mb-8">Platform Financial Intelligence</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/10 pt-8">
-                {[
-                  { label: "Ecosystem Revenue", value: `Rs. ${(totalRevenue / 1_000_000).toFixed(2)}M` },
-                  { label: "Market Engagement", value: "92%" },
-                  { label: "Producer ROI Avg.", value: "14.8%" },
-                  { label: "YoY Growth", value: "+28.4%" },
-                ].map((item, i) => (
-                  <div key={i} className="text-center">
-                    <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/30 mb-3">{item.label}</p>
-                    <p className="text-3xl font-serif font-black tracking-widest">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════ */}
-        {/* SUSTAINABILITY INSIGHTS TAB                            */}
-        {/* ══════════════════════════════════════════════════════ */}
-        {activeTab === "sustainability" && (
-          <div className="space-y-8">
-
-            {/* Eco KPI Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: "CO₂ Offset Sourcing", value: "14.5 Tons", icon: Globe, trend: "down", trendVal: 18.4, color: "text-emerald-600" },
-                { label: "Water Conserved", value: "124.5K L", icon: Droplet, trend: "up", trendVal: 24, color: "text-blue-500" },
-                { label: "Circularity Rate", value: "73%", icon: Recycle, trend: "up", trendVal: 11.2, color: "text-emerald-500" },
-                { label: "Supply Chain Grade", value: "A+", icon: Shield, trend: "up", trendVal: 5, color: "text-amber-500" },
-              ].map((kpi, i) => (
-                <div key={i} className="bg-white border border-black/5 p-6 hover:border-black/20 transition-all">
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 leading-tight pr-4">{kpi.label}</span>
-                    <kpi.icon size={16} className={`${kpi.color} opacity-70 shrink-0`} />
-                  </div>
-                  <p className={`text-3xl font-serif font-black tracking-tight ${kpi.color} mb-2`}>{kpi.value}</p>
-                  <p className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 ${kpi.trend === "up" ? "text-emerald-500" : "text-emerald-500"}`}>
-                    <ArrowUpRight size={11} />
-                    {kpi.trendVal}% improvement
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Circularity + Environmental Footprint */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-              {/* Sourcing Circularity Mix */}
-              <div className="bg-white border border-black/5 p-8">
-                <SectionTitle icon={Recycle} color="text-emerald-600">Sourcing Circularity Mix</SectionTitle>
-                <div className="flex items-center gap-8">
-                  <div className="h-56 flex-1">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={circularityData} innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value" startAngle={90} endAngle={-270}>
-                          {circularityData.map((_, i) => (
-                            <Cell key={i} fill={ECO[i % ECO.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<ChartTooltip suffix="%" />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="space-y-3 min-w-[160px]">
-                    {circularityData.map((d, i) => (
-                      <div key={i}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[8px] font-black uppercase tracking-widest text-gray-500 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-none shrink-0" style={{ backgroundColor: ECO[i % ECO.length] }} />
-                            {d.name}
-                          </span>
-                          <span className="text-[9px] font-black text-gray-700 ml-2">{d.value}%</span>
-                        </div>
-                        <div className="w-full h-0.5 bg-gray-100">
-                          <div className="h-full transition-all" style={{ width: `${d.value}%`, backgroundColor: ECO[i % ECO.length] }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Environmental Footprint per Garment */}
-              <div className="bg-white border border-black/5 p-8">
-                <SectionTitle icon={Droplet} color="text-blue-500">Environmental Footprint</SectionTitle>
-                <div className="h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ecoImpactData} barGap={3}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Bar dataKey="co2" name="CO₂ (kg)" fill="#000" radius={[2, 2, 0, 0]} maxBarSize={22} />
-                      <Bar dataKey="water" name="Water (L×0.1)" fill="#10B981" radius={[2, 2, 0, 0]} maxBarSize={22} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex items-center gap-6 mt-4">
-                  <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                    <span className="w-3 h-2 bg-black inline-block" />CO₂ Footprint (kg)
-                  </span>
-                  <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                    <span className="w-3 h-2 bg-emerald-500 inline-block" />Water (L / 10)
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Carbon Trend + Supplier Radar */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-              {/* Carbon Logistics Trend */}
-              <div className="lg:col-span-3 bg-white border border-black/5 p-8">
-                <SectionTitle icon={Wind} color="text-emerald-600">Logistics Carbon Trend vs Target</SectionTitle>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={carbonTrend}>
-                      <defs>
-                        <linearGradient id="co2Grad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#10B981" stopOpacity={0.15} />
-                          <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="tgtGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#6EE7B7" stopOpacity={0.1} />
-                          <stop offset="100%" stopColor="#6EE7B7" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#999" }} tickFormatter={(v) => `${v}kg`} />
-                      <Tooltip content={<ChartTooltip suffix=" kg CO₂" />} />
-                      <Area type="monotone" dataKey="co2" name="Actual CO₂" stroke="#10B981" strokeWidth={2.5} fill="url(#co2Grad)" dot={{ fill: "#10B981", r: 3, strokeWidth: 0 }} />
-                      <Area type="monotone" dataKey="target" name="Target" stroke="#6EE7B7" strokeWidth={1.5} strokeDasharray="4 3" fill="url(#tgtGrad)" dot={false} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex gap-6 mt-4">
-                  <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                    <span className="w-4 h-0.5 bg-emerald-500 inline-block" />Actual
-                  </span>
-                  <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                    <span className="w-4 h-0.5 bg-emerald-300 inline-block border-t border-dashed border-emerald-300" />Target
-                  </span>
-                </div>
-              </div>
-
-              {/* Supplier Compliance Radar */}
-              <div className="lg:col-span-2 bg-white border border-black/5 p-8">
-                <SectionTitle icon={Compass} color="text-amber-500">Supplier Compliance</SectionTitle>
-                <div className="h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={supplierRadar} margin={{ top: 0, right: 20, bottom: 0, left: 20 }}>
-                      <PolarGrid stroke="#f0f0f0" />
-                      <PolarAngleAxis dataKey="axis" tick={{ fontSize: 8, fill: "#999", fontWeight: 700 }} />
-                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 7, fill: "#ccc" }} tickCount={4} />
-                      <Radar name="Score" dataKey="value" stroke="#059669" fill="#059669" fillOpacity={0.12} strokeWidth={2} dot={{ fill: "#059669", r: 3 }} />
-                      <Tooltip content={<ChartTooltip suffix="%" />} />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {supplierRadar.map((s, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">{s.axis}</span>
-                      <span className={`text-[8px] font-black ${s.value >= 85 ? "text-emerald-500" : s.value >= 70 ? "text-amber-500" : "text-red-400"}`}>{s.value}%</span>
+                    <div className="pt-6 border-t border-white/10 text-[9px] text-white/40 uppercase tracking-widest flex items-center justify-between">
+                      <span>Status: Active</span>
+                      <span className="text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 size={12} /> Sync Healthy
+                      </span>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Material Eco-Score Table */}
-            <div className="bg-white border border-black/5 p-8">
-              <SectionTitle icon={Leaf} color="text-emerald-600">Garment Environmental Score Card</SectionTitle>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b-2 border-black">
-                      <th className="text-left py-3 text-[9px] font-black uppercase tracking-[0.25em] text-gray-400">Garment</th>
-                      <th className="text-center py-3 text-[9px] font-black uppercase tracking-[0.25em] text-gray-400">CO₂ (kg)</th>
-                      <th className="text-center py-3 text-[9px] font-black uppercase tracking-[0.25em] text-gray-400">Water (L)</th>
-                      <th className="text-center py-3 text-[9px] font-black uppercase tracking-[0.25em] text-gray-400">Eco Score</th>
-                      <th className="text-center py-3 text-[9px] font-black uppercase tracking-[0.25em] text-gray-400">Grade</th>
-                      <th className="py-3 text-[9px] font-black uppercase tracking-[0.25em] text-gray-400">Score Visual</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ecoImpactData.map((row, i) => {
-                      const grade = row.score >= 85 ? "A" : row.score >= 70 ? "B" : row.score >= 55 ? "C" : "D";
-                      const gradeColor = grade === "A" ? "text-emerald-600 bg-emerald-50" : grade === "B" ? "text-blue-600 bg-blue-50" : grade === "C" ? "text-amber-600 bg-amber-50" : "text-red-600 bg-red-50";
-                      return (
-                        <tr key={i} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
-                          <td className="py-4 text-[10px] font-black uppercase tracking-widest text-black">{row.name}</td>
-                          <td className="py-4 text-center text-[10px] font-bold text-gray-600">{row.co2}</td>
-                          <td className="py-4 text-center text-[10px] font-bold text-blue-500">{row.water}</td>
-                          <td className="py-4 text-center text-[10px] font-black text-black">{row.score}/100</td>
-                          <td className="py-4 text-center">
-                            <span className={`text-[9px] font-black uppercase px-2.5 py-1 ${gradeColor}`}>{grade}</span>
-                          </td>
-                          <td className="py-4 pr-4">
-                            <div className="w-full h-1.5 bg-gray-100 overflow-hidden">
-                              <div className="h-full bg-emerald-500 transition-all" style={{ width: `${row.score}%` }} />
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════ */}
+            {/* TAB 2: PRODUCT & CATEGORY INTELLIGENCE               */}
+            {/* ════════════════════════════════════════════════════ */}
+            {activeTab === "products" && (
+              <div key="products-tab" className="space-y-8 animate-in fade-in duration-300">
+
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+                  {/* Category Revenue Distribution — 2 cols */}
+                  <div className="lg:col-span-2 bg-white border border-black/5 p-8 shadow-sm">
+                    <SectionHeader
+                      icon={Tag}
+                      title="Category Revenue Share"
+                      subtitle="Revenue breakdown by apparel category"
+                      color="text-emerald-600"
+                    />
+                    {categoryData.length === 0 ? (
+                      <div className="h-64 flex items-center justify-center border border-dashed border-gray-200">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">No category data</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={categoryData}
+                                innerRadius={50}
+                                outerRadius={80}
+                                paddingAngle={4}
+                                dataKey="revenue"
+                                nameKey="_id"
+                              >
+                                {categoryData.map((_, i) => (
+                                  <Cell key={i} fill={BRAND_PALETTE[i % BRAND_PALETTE.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip content={<ChartTooltip prefix="Rs. " />} />
+                              <Legend
+                                verticalAlign="bottom"
+                                height={36}
+                                formatter={(value) => (
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-black">{value || "General Apparel"}</span>
+                                )}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="mt-4 space-y-2.5">
+                          {categoryData.map((cat, i) => {
+                            const share = totalRevenue ? ((cat.revenue / totalRevenue) * 100).toFixed(1) : 0;
+                            return (
+                              <div key={i} className="flex items-center justify-between text-[10px]">
+                                <span className="flex items-center gap-2 font-bold uppercase tracking-wider text-black">
+                                  <span className="w-2.5 h-2.5 shrink-0" style={{ backgroundColor: BRAND_PALETTE[i % BRAND_PALETTE.length] }} />
+                                  {cat._id || "General Apparel"}
+                                </span>
+                                <span className="font-black text-gray-600">Rs. {fmt(cat.revenue)} ({share}%)</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Top Garments Table — 3 cols */}
+                  <div className="lg:col-span-3 bg-white border border-black/5 p-8 shadow-sm">
+                    <SectionHeader
+                      icon={Package}
+                      title="Top Performing Garments"
+                      subtitle="Products ranked by sales volume & revenue generated"
+                    />
+                    {topProducts.length === 0 ? (
+                      <div className="h-64 flex items-center justify-center border border-dashed border-gray-200">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">No product sales yet</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                          <thead>
+                            <tr className="border-b-2 border-black text-[9px] font-black uppercase tracking-widest text-gray-400">
+                              <th className="py-2.5">#</th>
+                              <th className="py-2.5">Garment</th>
+                              <th className="py-2.5">Category</th>
+                              <th className="py-2.5 text-right">Units Sold</th>
+                              <th className="py-2.5 text-right">Revenue</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 text-[10px]">
+                            {topProducts.slice(0, 7).map((prod, idx) => {
+                              const imgUrl = resolveImage(prod.image);
+                              return (
+                                <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                  <td className="py-3 font-bold text-gray-400">#{idx + 1}</td>
+                                  <td className="py-3 font-bold text-black flex items-center gap-2.5">
+                                    {imgUrl ? (
+                                      <img
+                                        src={imgUrl}
+                                        alt={prod.name}
+                                        className="w-8 h-8 object-cover border border-gray-200 shrink-0"
+                                        onError={(e) => {
+                                          e.target.onerror = null;
+                                          e.target.style.display = "none";
+                                          if (e.target.nextSibling) e.target.nextSibling.style.display = "flex";
+                                        }}
+                                      />
+                                    ) : null}
+                                    <div
+                                      className="w-8 h-8 bg-gray-100 border border-gray-200 flex items-center justify-center text-[8px] font-black text-gray-400 shrink-0"
+                                      style={{ display: imgUrl ? "none" : "flex" }}
+                                    >
+                                      {prod.name ? prod.name.substring(0, 2).toUpperCase() : "GAR"}
+                                    </div>
+                                    <span className="truncate max-w-[140px]">{prod.name}</span>
+                                  </td>
+                                  <td className="py-3 uppercase text-gray-500 font-semibold">{prod.category || "General Apparel"}</td>
+                                  <td className="py-3 text-right font-black text-black">{fmt(prod.sold)}</td>
+                                  <td className="py-3 text-right font-black text-emerald-700">Rs. {fmt(prod.revenue)}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════ */}
+            {/* TAB 3: STRATEGIC INSIGHTS & ORDERS                    */}
+            {/* ════════════════════════════════════════════════════ */}
+            {activeTab === "insights" && (
+              <div key="insights-tab" className="space-y-8 animate-in fade-in duration-300">
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                  {/* Order Status Distribution */}
+                  <div className="bg-white border border-black/5 p-8 shadow-sm">
+                    <SectionHeader
+                      icon={Shield}
+                      title="Fulfillment & Order Status Dynamics"
+                      subtitle="Breakdown of order statuses across the ecosystem"
+                    />
+                    <div className="space-y-4 mt-4">
+                      {statusData.length === 0 ? (
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest py-8 text-center">
+                          No order data available
+                        </p>
+                      ) : (
+                        statusData.map((st, i) => {
+                          const pct = totalOrders ? Math.round((st.count / totalOrders) * 100) : 0;
+                          return (
+                            <div key={i} className="space-y-1">
+                              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                                <span className="text-black flex items-center gap-2">
+                                  <span className="w-2 h-2 bg-black inline-block" />
+                                  {st._id}
+                                </span>
+                                <span className="text-gray-500">{st.count} orders ({pct}%) — Rs. {fmt(st.totalValue)}</span>
+                              </div>
+                              <div className="w-full h-2 bg-gray-100 overflow-hidden">
+                                <div
+                                  className="h-full bg-emerald-600 transition-all duration-500"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Sustainability Decision Intelligence */}
-            <div className="bg-emerald-950 text-emerald-50 p-10">
-              <div className="flex items-center gap-3 mb-8">
-                <Zap size={14} className="text-emerald-400" />
-                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-400">
-                  AI-Powered Sustainability Decision Intelligence
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    badge: "Quick Win",
-                    title: "Localize Sourcing",
-                    body: "Apex Fabrics offers an organic cotton blend that reduces your Q3 T-shirt line's carbon footprint by 18%.",
-                    savings: "−18% CO₂",
-                    badgeColor: "border-emerald-400 text-emerald-400",
-                  },
-                  {
-                    badge: "Logistics",
-                    title: "Consolidated Packaging POs",
-                    body: "Consolidating packaging orders from Elite Packaging saves an estimated 420 kg CO₂ in domestic shipping.",
-                    savings: "−420 kg CO₂",
-                    badgeColor: "border-blue-400 text-blue-400",
-                  },
-                  {
-                    badge: "Compliance",
-                    title: "Vendor Upgrade Alert",
-                    body: "Transitioning from Luxe Lace & Trims (inactive) to certified Eco Thread Co. will improve your supply chain compliance index by 8%.",
-                    savings: "+8% Compliance",
-                    badgeColor: "border-amber-400 text-amber-400",
-                  },
-                ].map((tip, i) => (
-                  <div key={i} className={`space-y-3 ${i < 2 ? "border-r border-emerald-800/30 pr-8" : ""}`}>
-                    <span className={`inline-block px-2.5 py-0.5 border text-[8px] font-black uppercase tracking-widest ${tip.badgeColor}`}>
-                      {tip.badge}
-                    </span>
-                    <p className="text-sm font-black text-white uppercase tracking-wider">{tip.title}</p>
-                    <p className="text-[10px] text-emerald-200/60 leading-relaxed">{tip.body}</p>
-                    <div className="flex items-center gap-2 mt-3">
-                      <TrendingDown size={12} className="text-emerald-400" />
-                      <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">{tip.savings}</span>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-          </div>
+                  {/* Regional Delivery Cities */}
+                  <div className="bg-white border border-black/5 p-8 shadow-sm">
+                    <SectionHeader
+                      icon={MapPin}
+                      title="Top Delivery Destinations"
+                      subtitle="Geographic concentration of store sales"
+                      color="text-emerald-600"
+                    />
+                    <div className="space-y-3 mt-4">
+                      {cityData.length === 0 ? (
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest py-8 text-center">
+                          No regional data detected
+                        </p>
+                      ) : (
+                        cityData.map((city, i) => (
+                          <div key={i} className="flex items-center justify-between p-3 border border-gray-100 bg-gray-50/50">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-black text-gray-400 w-5">#{i + 1}</span>
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-black">{city._id}</span>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[10px] font-black text-black">Rs. {fmt(city.revenue)}</p>
+                              <p className="text-[8px] font-bold uppercase text-gray-400">{city.orders} orders</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Automated Business Recommendation Intelligence */}
+                <div className="bg-black text-white p-8 shadow-md">
+                  <div className="flex items-center gap-2.5 mb-6">
+                    <Zap size={16} className="text-emerald-400" />
+                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white">
+                      Automated Platform Intelligence &amp; Actions
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/10">
+                    <div className="space-y-2">
+                      <span className="px-2 py-0.5 border border-emerald-400 text-[8px] font-black uppercase tracking-widest text-emerald-400">
+                        Revenue Optimization
+                      </span>
+                      <p className="text-sm font-serif font-bold text-white">Focus on Top Categories</p>
+                      <p className="text-[10px] text-white/60 leading-relaxed">
+                        {categoryData[0] ? `${categoryData[0]._id} leads revenue generation with Rs. ${fmt(categoryData[0].revenue)}. Maintain inventory depth for these items.` : "Add more catalog items to establish category velocity baseline."}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="px-2 py-0.5 border border-amber-400 text-[8px] font-black uppercase tracking-widest text-amber-400">
+                        Order Efficiency
+                      </span>
+                      <p className="text-sm font-serif font-bold text-white">Fulfillment Velocity</p>
+                      <p className="text-[10px] text-white/60 leading-relaxed">
+                        Order completion rate is sitting at {fulfillmentRate}%. Ensure processing orders transition swiftly to shipped status.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="px-2 py-0.5 border border-blue-400 text-[8px] font-black uppercase tracking-widest text-blue-400">
+                        Stock Alignment
+                      </span>
+                      <p className="text-sm font-serif font-bold text-white">High-Demand Replenishment</p>
+                      <p className="text-[10px] text-white/60 leading-relaxed">
+                        {topProducts[0] ? `Top garment '${topProducts[0].name}' has sold ${topProducts[0].sold} units. Check inventory levels.` : "Monitor low-stock alerts on the main dashboard to prevent stockouts."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+          </>
         )}
-      </div>{/* end contentRef */}
+
+      </div>
 
     </div>
   );

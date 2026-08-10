@@ -228,27 +228,37 @@ exports.downloadFullReport = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     let match = {};
-    if (startDate && endDate) {
-      match.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    if (startDate && endDate && startDate !== "all" && endDate !== "all") {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        match.createdAt = { $gte: start, $lte: end };
+      }
     }
 
     const orders = await Order.find(match).populate("user", "name email").lean();
-    
-    const data = orders.map(o => ({
-      ID: o._id.toString(),
-      Customer: o.user?.name || "Guest",
-      Email: o.user?.email || "N/A",
-      Status: o.status,
-      Amount: o.totalAmount,
-      Date: new Date(o.createdAt).toLocaleDateString()
+
+    const data = orders.map((o) => ({
+      "Order ID": o._id.toString(),
+      "Customer Name": o.user?.name || "Guest Customer",
+      "Customer Email": o.user?.email || "N/A",
+      "Order Status": o.status ? String(o.status).toUpperCase() : "PLACED",
+      "Items Quantity": Array.isArray(o.items) ? o.items.reduce((sum, i) => sum + (i.quantity || 1), 0) : 0,
+      "Total Amount (Rs)": o.totalAmount || 0,
+      "Payment Method": o.paymentMethod || "Card",
+      "Delivery City": o.shippingAddress?.city || "N/A",
+      "Delivery Address": o.shippingAddress?.address || "N/A",
+      "Order Date": o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "N/A",
     }));
 
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, "Orders");
+    const ws = XLSX.utils.json_to_sheet(data.length ? data : [{ Message: "No orders found for selected date range" }]);
+    XLSX.utils.book_append_sheet(wb, ws, "Orders Report");
     const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 
-    res.setHeader("Content-Disposition", "attachment; filename=Report.xlsx");
+    res.setHeader("Content-Disposition", "attachment; filename=EStore_Platform_Report.xlsx");
     res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     return res.send(buf);
   } catch (err) {
@@ -260,12 +270,15 @@ exports.getSalesAnalytics = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         let match = { status: { $ne: "cancelled" } };
-        if (startDate && endDate) {
+        
+        if (startDate && endDate && startDate !== "all" && endDate !== "all") {
             const start = new Date(startDate);
-            start.setHours(0, 0, 0, 0);
             const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-            match.createdAt = { $gte: start, $lte: end };
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                match.createdAt = { $gte: start, $lte: end };
+            }
         }
 
         const trend = await Order.aggregate([
@@ -273,7 +286,8 @@ exports.getSalesAnalytics = async (req, res) => {
             {
                 $group: {
                     _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                    revenue: { $sum: "$totalAmount" }
+                    revenue: { $sum: { $ifNull: ["$totalAmount", 0] } },
+                    orders: { $sum: 1 }
                 }
             },
             { $sort: { _id: 1 } }
@@ -287,18 +301,138 @@ exports.getSalesAnalytics = async (req, res) => {
 
 exports.getProductAnalytics = async (req, res) => {
     try {
-        const top = await Order.aggregate([
+        const { startDate, endDate } = req.query;
+        let orderMatch = {};
+        if (startDate && endDate && startDate !== "all" && endDate !== "all") {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                orderMatch.createdAt = { $gte: start, $lte: end };
+            }
+        }
+
+        // Top products by sold quantity & revenue
+        const topProducts = await Order.aggregate([
+            { $match: { ...orderMatch, status: { $ne: "cancelled" } } },
             { $unwind: "$items" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "details"
+                }
+            },
+            { $unwind: { path: "$details", preserveNullAndEmptyArrays: true } },
             {
                 $group: {
                     _id: "$items.productId",
-                    sold: { $sum: "$items.quantity" }
+                    sold: { $sum: { $ifNull: ["$items.quantity", 1] } },
+                    revenue: {
+                        $sum: {
+                            $multiply: [
+                                { $ifNull: ["$items.quantity", 1] },
+                                { $ifNull: ["$items.price", { $ifNull: ["$details.price", 0] }] }
+                            ]
+                        }
+                    },
+                    details: { $first: "$details" }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    sold: 1,
+                    revenue: 1,
+                    name: { $ifNull: ["$details.name", "Garment Item"] },
+                    category: {
+                        $cond: {
+                            if: { $or: [{ $eq: ["$details.category", ""] }, { $eq: ["$details.category", null] }, { $eq: [{ $type: "$details.category" }, "missing"] }] },
+                            then: "General Apparel",
+                            else: "$details.category"
+                        }
+                    },
+                    image: { $arrayElemAt: ["$details.images", 0] },
+                    price: { $ifNull: ["$details.price", 0] }
                 }
             },
             { $sort: { sold: -1 } },
             { $limit: 10 }
         ]);
-        return res.status(200).json({ success: true, data: top });
+
+        // Category breakdown
+        const categoryBreakdown = await Order.aggregate([
+            { $match: { ...orderMatch, status: { $ne: "cancelled" } } },
+            { $unwind: "$items" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "details"
+                }
+            },
+            { $unwind: { path: "$details", preserveNullAndEmptyArrays: true } },
+            {
+                $group: {
+                    _id: {
+                        $cond: {
+                            if: { $or: [{ $eq: ["$details.category", ""] }, { $eq: ["$details.category", null] }, { $eq: [{ $type: "$details.category" }, "missing"] }] },
+                            then: "General Apparel",
+                            else: "$details.category"
+                        }
+                    },
+                    revenue: {
+                        $sum: {
+                            $multiply: [
+                                { $ifNull: ["$items.quantity", 1] },
+                                { $ifNull: ["$items.price", { $ifNull: ["$details.price", 0] }] }
+                            ]
+                        }
+                    },
+                    sold: { $sum: { $ifNull: ["$items.quantity", 1] } }
+                }
+            },
+            { $sort: { revenue: -1 } }
+        ]);
+
+        // Order status breakdown
+        const statusBreakdown = await Order.aggregate([
+            { $match: orderMatch },
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 },
+                    totalValue: { $sum: { $ifNull: ["$totalAmount", 0] } }
+                }
+            }
+        ]);
+
+        // Top delivery cities
+        const cityBreakdown = await Order.aggregate([
+            { $match: { ...orderMatch, status: { $ne: "cancelled" } } },
+            {
+                $group: {
+                    _id: { $ifNull: ["$shippingAddress.city", "General"] },
+                    orders: { $sum: 1 },
+                    revenue: { $sum: "$totalAmount" }
+                }
+            },
+            { $sort: { revenue: -1 } },
+            { $limit: 5 }
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                topProducts,
+                categoryBreakdown,
+                statusBreakdown,
+                cityBreakdown
+            }
+        });
     } catch (err) {
         return res.status(500).json({ success: false, message: err.message });
     }
