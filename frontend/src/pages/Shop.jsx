@@ -6,6 +6,8 @@ import hero from "../assets/hero.png";
 import men from "../assets/men.png";
 import women from "../assets/women.png";
 import quote from "../assets/quote.png";
+import { useAuth } from "../auth/AuthContext";
+
 /**
  * PRODUCTION-READY SHOP PAGE
  * Implementation Details:
@@ -16,7 +18,9 @@ import quote from "../assets/quote.png";
  * - Hover effects & high-quality card layouts
  */
 export default function Shop() {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,9 +45,23 @@ export default function Shop() {
     }
   };
 
+  const fetchRecommendations = async () => {
+    try {
+      const uId = user?.id || "guest";
+      const res = await api.get(`/api/recommendations/${uId}`);
+      setRecommendedProducts(res.data || []);
+    } catch (err) {
+      console.error("Failed to load recommendations:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [user]);
 
   // Filter products locally for instant UX (can be offloaded to API for scale)
   const filteredProducts = products.filter(p =>
@@ -151,6 +169,26 @@ export default function Shop() {
           ))}
         </div>
       </section>
+
+      {/* ── Recommended For You ── */}
+      {recommendedProducts.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 border-t border-gray-100">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 mb-2 font-bold font-sans">Curated Selection</p>
+              <h2 className="text-3xl font-serif font-bold uppercase tracking-widest text-black">Recommended For You</h2>
+              <p className="text-xs text-gray-400 uppercase tracking-widest mt-2 font-sans">
+                Personalized styles handpicked based on your taste.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+            {recommendedProducts.slice(0, 4).map((product) => (
+              <ProductCard key={`${product._id}-recommendation`} product={product} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── Gender Categories ── */}
       <section className="grid grid-cols-1 md:grid-cols-2 h-[600px] w-full mt-10">

@@ -10,7 +10,6 @@ import {
   X,
   Star,
   AlertTriangle,
-  TrendingUp,
   PlusCircle,
   Download,
   Truck,
@@ -24,37 +23,7 @@ import {
   Activity,
   FileSpreadsheet,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell,
-  PieChart,
-  Pie,
-} from "recharts";
 import api from "../../api/axios";
-
-// Static mock data for charts
-const COST_TREND_DATA = [
-  { name: "Jan", Fabric: 18000, Accessories: 12000, Packaging: 5000 },
-  { name: "Feb", Fabric: 22000, Accessories: 14000, Packaging: 6000 },
-  { name: "Mar", Fabric: 30000, Accessories: 15000, Packaging: 5500 },
-  { name: "Apr", Fabric: 25000, Accessories: 17000, Packaging: 7000 },
-  { name: "May", Fabric: 35000, Accessories: 20000, Packaging: 8000 },
-  { name: "Jun", Fabric: 45000, Accessories: 24000, Packaging: 10000 }
-];
-
-const CATEGORY_DISTRIBUTION = [
-  { name: "Fabric", value: 55 },
-  { name: "Accessories", value: 35 },
-  { name: "Packaging", value: 10 }
-];
 
 const SupplierManagement = ({ activeTab: initialTab = "suppliers" }) => {
 
@@ -523,12 +492,11 @@ const SupplierManagement = ({ activeTab: initialTab = "suppliers" }) => {
         </div>
 
         {/* Custom ERP Navigation Tabs */}
-        <div className="flex items-center flex-wrap gap-2 border border-black/5 bg-white p-1">
+        <div className="flex items-center flex-nowrap gap-2 border border-black/5 bg-white p-1 overflow-x-auto">
           {[
             { id: "suppliers", label: "Suppliers & Vendors", icon: Truck },
             { id: "raw-materials", label: "Raw Materials", icon: Scissors },
             { id: "purchase-orders", label: "Purchase Orders & Payments", icon: FileText },
-            { id: "sales-reports", label: "Procurement Analytics", icon: TrendingUp },
           ].map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -536,7 +504,7 @@ const SupplierManagement = ({ activeTab: initialTab = "suppliers" }) => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${
+                className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all flex items-center space-x-2 whitespace-nowrap shrink-0 ${
                   active
                     ? "bg-black text-white"
                     : "text-gray-400 hover:text-black hover:bg-gray-50"
@@ -1130,140 +1098,7 @@ const SupplierManagement = ({ activeTab: initialTab = "suppliers" }) => {
         </div>
       )}
 
-      {/* TAB 4: PROCUREMENT ANALYTICS */}
-      {activeTab === "sales-reports" && (
-        <div className="space-y-10 animate-in fade-in duration-300">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Purchase cost breakdown line chart */}
-            <div className="lg:col-span-2 bg-white border border-black/5 p-8">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-2">
-                  <span className="w-1.5 h-3 bg-black"></span>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-black">
-                    Monthly Sourcing Cost Trends
-                  </h3>
-                </div>
-                <div className="flex items-center space-x-4 text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                  <span className="flex items-center"><span className="w-2 h-2 bg-black mr-1"></span> Fabric</span>
-                  <span className="flex items-center"><span className="w-2 h-2 bg-gray-400 mr-1"></span> Accessories</span>
-                  <span className="flex items-center"><span className="w-2 h-2 bg-gray-200 mr-1"></span> Packaging</span>
-                </div>
-              </div>
-              
-              <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={COST_TREND_DATA}>
-                    <defs>
-                      <linearGradient id="fabricGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#000" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#000" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#999" }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 9, fill: "#999" }} axisLine={false} tickLine={false} tickFormatter={(v) => `Rs.${v}`} />
-                    <Tooltip formatter={(v) => [`Rs.${v}`, "Cost"]} labelStyle={{ fontSize: 9, textTransform: "uppercase" }} />
-                    <Area type="monotone" dataKey="Fabric" stroke="#000" strokeWidth={2} fillOpacity={1} fill="url(#fabricGrad)" />
-                    <Area type="monotone" dataKey="Accessories" stroke="#888" strokeWidth={1.5} fill="none" />
-                    <Area type="monotone" dataKey="Packaging" stroke="#ccc" strokeWidth={1} fill="none" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            {/* Distribution Pie Chart */}
-            <div className="bg-white border border-black/5 p-8 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center space-x-2 mb-8">
-                  <span className="w-1.5 h-3 bg-black"></span>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-black">
-                    Procurement Cost Share
-                  </h3>
-                </div>
-                
-                <div className="h-56 w-full flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={CATEGORY_DISTRIBUTION}
-                        innerRadius={55}
-                        outerRadius={75}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        <Cell fill="#000" />
-                        <Cell fill="#666" />
-                        <Cell fill="#ccc" />
-                      </Pie>
-                      <Tooltip formatter={(v) => [`${v}%`, "Cost Share"]} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-6 border-t border-black/5">
-                {CATEGORY_DISTRIBUTION.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                    <span className="flex items-center">
-                      <span
-                        className="w-2.5 h-2.5 mr-2"
-                        style={{ backgroundColor: idx === 0 ? "#000" : idx === 1 ? "#666" : "#ccc" }}
-                      ></span>
-                      {item.name}
-                    </span>
-                    <span className="font-bold text-black">{item.value}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Purchasing report lists */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-black text-white p-8">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-6">
-                Material Purchasing Strategy
-              </h4>
-              <div className="space-y-6 text-[11px]">
-                <div className="border-b border-white/10 pb-4">
-                  <p className="font-black uppercase tracking-wide mb-1 text-white">Fabric Price Volatility Alert</p>
-                  <p className="text-[10px] text-white/50 leading-relaxed uppercase">
-                    Raw cotton fabric indexes showing up to 8% upward trend in local markets. Secure Q3 requirements with Apex Fabrics under existing Net 30 lines.
-                  </p>
-                </div>
-                <div className="pb-4">
-                  <p className="font-black uppercase tracking-wide mb-1 text-white">Freights Optimization</p>
-                  <p className="text-[10px] text-white/50 leading-relaxed uppercase">
-                    Combine buttons and zippers orders with Trim & Button Co. to hit the Rs. 500,000 threshold for free bulk freight. Saves average Rs. 35,000 per PO routing.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[#fafafa] border border-black/5 p-8 flex flex-col justify-between">
-              <div>
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6">
-                  Sourcing Distribution by Logistics Category
-                </h4>
-                <div className="space-y-4">
-                  {[
-                    { label: "Apex Fabrics (Lace & Linens)", orders: 84, score: "96.4%" },
-                    { label: "Trim & Button Co. (Plastics & Snaps)", orders: 48, score: "95.1%" },
-                    { label: "Eco Thread Co. (Polyester Spools)", orders: 112, score: "99.0%" }
-                  ].map((lead, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-[10px] uppercase font-bold tracking-wide">
-                      <span className="text-gray-500">{lead.label}</span>
-                      <span className="font-mono text-black">{lead.orders} Orders &bull; {lead.score} On-Time</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      )}
 
       {/* MODAL 1: Add/Edit Supplier Form */}
       {isModalOpen && (
