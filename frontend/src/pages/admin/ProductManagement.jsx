@@ -18,6 +18,7 @@ import {
   Trash,
 } from "lucide-react";
 import api from "../../api/axios";
+import { API_BASE_URL } from "../../api/axios";
 
 // ── Category → Dimension (Size) Mapping ──────────────────────────────────
 const CATEGORIES = ["T-Shirt", "Shirt", "Jeans", "Skirt", "Frock"];
@@ -307,7 +308,7 @@ const AdminProductManagement = () => {
                     <div className="w-16 h-16 bg-gray-50 overflow-hidden flex items-center justify-center border border-black/5">
                       {product.images?.[0] ? (
                         <img
-                          src={product.images[0].startsWith("/uploads") ? `http://localhost:5000${product.images[0]}` : product.images[0]}
+                          src={product.images[0].startsWith("/uploads") ? `${API_BASE_URL}${product.images[0]}` : product.images[0]}
                           alt=""
                           className="w-full h-full object-cover"
                         />
@@ -661,7 +662,7 @@ const AdminProductManagement = () => {
                   {formData.images.map((img, idx) => (
                     <div key={idx} className="relative group aspect-square bg-gray-50 border border-black/5 overflow-hidden">
                       <img
-                        src={img.startsWith("/uploads") ? `http://localhost:5000${img}` : img}
+                        src={img.startsWith("/uploads") ? `${API_BASE_URL}${img}` : img}
                         alt=""
                         className="w-full h-full object-cover"
                       />
