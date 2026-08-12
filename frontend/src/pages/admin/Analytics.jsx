@@ -12,11 +12,10 @@ import {
 import api from "../../api/axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { API_BASE_URL } from "../../api/axios";
 
 /* ─────────────── Helpers ─────────────── */
 const fmt = (n) => Number(n || 0).toLocaleString();
-const BASE_URL = import.meta.env.VITE_API_URL || `${API_BASE_URL}`;
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function resolveImage(img) {
   if (!img) return null;
